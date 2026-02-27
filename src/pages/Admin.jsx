@@ -13,7 +13,7 @@ import {
     Headset, MessageSquare, Ticket, CheckSquare, BarChart, LogIn, Eye, EyeOff, ChevronLeft
 } from 'lucide-react';
 import { subscribeToConversations, sendMessage } from '../services/messageService';
-import { subscribeToAllUsers, updateUserStatus, updateUserPoints, updateUserTradeResult, getUsersPaginated, updateUserFreezeStatus, incrementUserPoints, resetUserPassword } from '../services/userService';
+import { subscribeToAllUsers, updateUserStatus, updateUserPoints, updateUserTradeResult, getUsersPaginated, updateUserFreezeStatus, incrementUserPoints, resetUserPassword, markUserAsSeen } from '../services/userService';
 import { updateVerificationStatus, getVerificationsPaginated, subscribeToAllVerifications } from '../services/verificationService';
 import { getDepositSettings, updateDepositSettings, updateDepositStatus, subscribeToAllDeposits } from '../services/depositService';
 import { updateWithdrawalStatus, getWithdrawalsPaginated, subscribeToAllWithdrawals } from '../services/withdrawalService';
@@ -426,7 +426,13 @@ const Admin = () => {
         }
     };
 
+    const handleMarkAsSeen = async (userId) => {
+        // Optimistic UI update
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, adminHasSeen: true } : u));
 
+        // Backend update
+        await markUserAsSeen(userId);
+    };
 
     const handleResetPassword = async (email) => {
         const newPassword = prompt(`Enter new password for ${email}: `, 'password123');
@@ -980,7 +986,18 @@ const Admin = () => {
                                                                 {(user.full_name && user.full_name.length > 0 ? user.full_name : (user.email || '?')).charAt(0).toUpperCase()}
                                                             </div>
                                                             <div>
-                                                                <div className="font-bold text-white group-hover/row:text-primary transition-colors">{user.full_name || user.name || 'Unknown User'}</div>
+                                                                <div className="font-bold text-white group-hover/row:text-primary transition-colors flex items-center gap-2">
+                                                                    {user.full_name || user.name || 'Unknown User'}
+                                                                    {user.adminHasSeen === false && (
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); handleMarkAsSeen(user.id); }}
+                                                                            className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded text-[9px] font-bold uppercase tracking-wider animate-pulse hover:bg-blue-500/40 transition-colors"
+                                                                            title="Click to dismiss 'NEW' label"
+                                                                        >
+                                                                            NEW
+                                                                        </button>
+                                                                    )}
+                                                                </div>
                                                                 <div className="text-gray-500 text-xs mt-0.5">{user.email}</div>
                                                             </div>
                                                         </div>
@@ -1143,7 +1160,18 @@ const Admin = () => {
                                                                 {user.full_name && user.full_name.length > 0 ? user.full_name.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : '?')}
                                                             </div>
                                                             <div>
-                                                                <div className="font-bold text-white group-hover/row:text-primary transition-colors">{user.full_name || user.name || 'Unknown User'}</div>
+                                                                <div className="font-bold text-white group-hover/row:text-primary transition-colors flex items-center gap-2">
+                                                                    {user.full_name || user.name || 'Unknown User'}
+                                                                    {user.adminHasSeen === false && (
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); handleMarkAsSeen(user.id); }}
+                                                                            className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded text-[9px] font-bold uppercase tracking-wider animate-pulse hover:bg-blue-500/40 transition-colors"
+                                                                            title="Click to dismiss 'NEW' label"
+                                                                        >
+                                                                            NEW
+                                                                        </button>
+                                                                    )}
+                                                                </div>
                                                                 <div className="text-gray-500 text-xs mt-0.5">{user.email}</div>
                                                             </div>
                                                         </div>
@@ -1164,8 +1192,8 @@ const Admin = () => {
                                                     </td>
                                                     <td className="px-6 py-5">
                                                         <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide border ${user.verificationStatus === 'pending'
-                                                                ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                                                                : 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                            ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                            : 'bg-red-500/10 text-red-500 border-red-500/20'
                                                             }`}>
                                                             {user.verificationStatus || 'unverified'}
                                                         </span>

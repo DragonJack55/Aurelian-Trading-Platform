@@ -24,6 +24,7 @@ export const initiateRegistration = async (formData) => {
             role: 'client',
             status: 'approved', // Set to approved so they appear in Active Users
             verificationStatus: 'unverified', // Initially, they have not submitted identity docs
+            adminHasSeen: false, // Flag to show 'NEW' badge in Admin panel
             password: formData.password,
             points: 0,
             balance: 0,

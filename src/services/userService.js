@@ -180,3 +180,13 @@ export const deleteUserProfile = async (userId) => {
 export const syncLocalStorageToFirestore = async () => {
     return { success: true };
 };
+
+export const markUserAsSeen = async (userId) => {
+    try {
+        await updateDoc(doc(db, "users", userId), { adminHasSeen: true });
+        return { success: true };
+    } catch (error) {
+        console.error('markUserAsSeen failed:', error.message);
+        return { success: false, error: error.message };
+    }
+};
