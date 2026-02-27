@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthLayout from './AuthLayout';
 import { initiateRegistration, login } from '../../services/authService';
+import emailjs from '@emailjs/browser';
 
 const Register = () => {
     console.log('[Register] Mounting...');
@@ -9,6 +10,12 @@ const Register = () => {
     // Step state removed as we only have one step now
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // OTP States
+    const [showOTP, setShowOTP] = useState(false);
+    const [generatedOTP, setGeneratedOTP] = useState('');
+    const [enteredOTP, setEnteredOTP] = useState('');
+    const [isVerifying, setIsVerifying] = useState(false);
 
     // Registration data
     const [formData, setFormData] = useState({
@@ -40,6 +47,57 @@ const Register = () => {
         }
 
         setLoading(true);
+
+        // 1. Generate 6 digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        setGeneratedOTP(otp);
+
+        try {
+            // 2. Send Email via EmailJS
+            // Note: User needs to replace these keys with their actual EmailJS credentials
+            const serviceID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'PENDING_SERVICE_ID';
+            const templateID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'PENDING_TEMPLATE_ID';
+            const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'PENDING_PUBLIC_KEY';
+
+            if (serviceID === 'PENDING_SERVICE_ID') {
+                setLoading(false);
+                return setError('EmailJS credentials are not configured yet. Please configure them in your environment variables.');
+            }
+
+            // Using Send method
+            await emailjs.send(
+                serviceID,
+                templateID,
+                {
+                    to_email: formData.email,
+                    to_name: formData.fullName,
+                    otp_code: otp,
+                },
+                publicKey
+            );
+
+            // 3. Show OTP Modal
+            setLoading(false);
+            setShowOTP(true);
+
+        } catch (err) {
+            console.error('Failed to send OTP email:', err);
+            setLoading(false);
+            setError('Failed to send verification email. Please try again or check your configuration.');
+        }
+    };
+
+    const handleVerifyOTP = async (e) => {
+        e.preventDefault();
+
+        if (enteredOTP !== generatedOTP) {
+            return setError('Invalid verification code. Please try again.');
+        }
+
+        setIsVerifying(true);
+        setError('');
+
+        // Proceed with actual registration
         const result = await initiateRegistration(formData);
 
         if (result.success) {
@@ -50,7 +108,7 @@ const Register = () => {
                     window.dispatchEvent(new Event('storage'));
                     navigate('/'); // Redirect to Home/Dashboard
                 } else {
-                    setLoading(false);
+                    setIsVerifying(false);
                     setError('Account created! Logging in...');
                     setTimeout(() => {
                         window.dispatchEvent(new Event('storage'));
@@ -59,18 +117,15 @@ const Register = () => {
                 }
             } else {
                 // Case B: Auto-Confirm is OFF (Email verification required)
-                setLoading(false);
+                setIsVerifying(false);
                 alert('Account created! Please check your email to confirm your account before logging in.');
                 navigate('/login');
             }
         } else {
-            setLoading(false);
+            setIsVerifying(false);
             setError(result.error || 'Registration failed');
         }
     };
-
-
-
     return (
         <AuthLayout
             title="Create Account"
@@ -187,6 +242,59 @@ const Register = () => {
                     </p>
                 </div>
             </form>
+
+            {/* OTP Modal Overlay */}
+            {showOTP && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-[#0a0f1c] border border-gray-200 dark:border-white/10 p-8 rounded-2xl shadow-2xl w-full max-w-md relative">
+                        {/* Close button */}
+                        <button
+                            onClick={() => setShowOTP(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                        >
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
+
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
+                                <span className="material-symbols-outlined text-3xl text-primary">mark_email_read</span>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-display uppercase tracking-wider">Verify Email</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                We've sent a 6-digit verification code to <br />
+                                <strong className="text-primary">{formData.email}</strong>
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleVerifyOTP}>
+                            <div className="mb-6">
+                                <label className="block text-xs font-bold tracking-widest text-gray-500 dark:text-gray-400 mb-2 uppercase text-center">Enter Code</label>
+                                <input
+                                    type="text"
+                                    maxLength="6"
+                                    required
+                                    value={enteredOTP}
+                                    onChange={(e) => setEnteredOTP(e.target.value.replace(/\D/g, ''))} // Only allow numbers
+                                    className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-center text-3xl tracking-[0.5em] font-mono font-bold text-gray-900 dark:text-primary focus:outline-none focus:border-primary transition-all shadow-inner"
+                                    placeholder="------"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isVerifying || enteredOTP.length !== 6}
+                                className="w-full py-4 bg-gradient-gold hover:opacity-90 text-black font-bold uppercase tracking-widest rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(212,175,55,0.2)]"
+                            >
+                                {isVerifying ? 'Verifying...' : 'Confirm Account'}
+                            </button>
+
+                            <p className="text-xs text-center text-gray-500 mt-6">
+                                Didn't receive the email? Check your spam folder or cancel to try again.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            )}
         </AuthLayout>
     );
 };
