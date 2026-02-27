@@ -81,9 +81,42 @@ const Register = () => {
             setShowOTP(true);
 
         } catch (err) {
-            console.error('Failed to send OTP email:', err);
-            setLoading(false);
-            setError('Failed to send verification email. Please try again or check your configuration.');
+            console.warn('EmailJS returned an error:', err);
+
+            // Handle Quota Exceeded (400) or other blocking errors by letting them through
+            if (err?.status === 400 || (err?.text && err.text.toLowerCase().includes('limit'))) {
+                console.log('EmailJS quota likely exceeded. Failing open (allowing registration without OTP)...');
+
+                const result = await initiateRegistration(formData);
+
+                if (result.success) {
+                    if (result.session) {
+                        const loginRes = await login(formData.email, formData.password);
+                        if (loginRes.success) {
+                            window.dispatchEvent(new Event('storage'));
+                            navigate('/');
+                        } else {
+                            setLoading(false);
+                            setError('Account created! Logging in...');
+                            setTimeout(() => {
+                                window.dispatchEvent(new Event('storage'));
+                                navigate('/');
+                            }, 1000);
+                        }
+                    } else {
+                        setLoading(false);
+                        alert('Account created! Please check your email to confirm your account before logging in.');
+                        navigate('/login');
+                    }
+                } else {
+                    setLoading(false);
+                    setError(result.error || 'Registration failed');
+                }
+            } else {
+                // If it's a different error, show the error message
+                setLoading(false);
+                setError('Failed to send verification email. Please try again or contact support.');
+            }
         }
     };
 
