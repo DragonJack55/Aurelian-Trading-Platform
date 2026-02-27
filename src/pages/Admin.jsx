@@ -503,8 +503,8 @@ const Admin = () => {
         }));
     };
 
-    // KYC Unverified users are those whose kycStatus is not 'verified' (e.g. 'unverified', 'pending', or not set yet)
-    const pendingUsers = users.filter(u => u.role !== 'admin' && u.kycStatus !== 'verified');
+    // KYC Unverified users are those whose verificationStatus is not 'verified' (e.g. 'unverified', 'pending', or not set yet)
+    const pendingUsers = users.filter(u => u.role !== 'admin' && u.verificationStatus !== 'verified');
     // Broaden definition of 'approved'/active users to include anyone not pending/rejected
     const approvedUsers = users.filter(u => u.status !== 'pending' && u.status !== 'rejected');
     const rejectedUsers = users.filter(u => u.status === 'rejected');
@@ -1163,11 +1163,11 @@ const Admin = () => {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-5">
-                                                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide border ${user.kycStatus === 'pending'
+                                                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide border ${user.verificationStatus === 'pending'
                                                                 ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                                                                 : 'bg-red-500/10 text-red-500 border-red-500/20'
                                                             }`}>
-                                                            {user.kycStatus || 'unverified'}
+                                                            {user.verificationStatus || 'unverified'}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-5">
