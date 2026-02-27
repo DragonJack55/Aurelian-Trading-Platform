@@ -503,7 +503,8 @@ const Admin = () => {
         }));
     };
 
-    const pendingUsers = users.filter(u => u.status === 'pending');
+    // KYC Unverified users are those whose kycStatus is not 'verified' (e.g. 'unverified', 'pending', or not set yet)
+    const pendingUsers = users.filter(u => u.role !== 'admin' && u.kycStatus !== 'verified');
     // Broaden definition of 'approved'/active users to include anyone not pending/rejected
     const approvedUsers = users.filter(u => u.status !== 'pending' && u.status !== 'rejected');
     const rejectedUsers = users.filter(u => u.status === 'rejected');
@@ -1129,7 +1130,7 @@ const Admin = () => {
                                             <tr>
                                                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">User Details</th>
                                                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Credentials</th>
-                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">KYC Status</th>
                                                 <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
                                             </tr>
                                         </thead>
@@ -1162,37 +1163,22 @@ const Admin = () => {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-5">
-                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                                            Pending Review
+                                                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide border ${user.kycStatus === 'pending'
+                                                                ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                                : 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                            }`}>
+                                                            {user.kycStatus || 'unverified'}
                                                         </span>
-                                                        <div className="text-[10px] text-gray-500 mt-2">
-                                                            {user.registeredAt}
-                                                        </div>
                                                     </td>
-                                                    <td className="px-6 py-5 text-right">
-                                                        <div className="flex justify-end gap-2">
+                                                    <td className="px-6 py-5">
+                                                        <div className="flex items-center justify-end gap-2">
                                                             <button
-                                                                onClick={() => approveUser(user.id)}
-                                                                className="p-2 bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white rounded-lg transition-all duration-300 border border-green-500/20 hover:border-green-500 hover:shadow-[0_0_15px_rgba(34,197,94,0.4)]"
-                                                                title="Approve User"
+                                                                onClick={() => {
+                                                                    setActiveSection('verifications');
+                                                                }}
+                                                                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
                                                             >
-                                                                <Check size={18} />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => rejectUser(user.id)}
-                                                                className="p-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg transition-all duration-300 border border-red-500/20 hover:border-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.4)]"
-                                                                title="Reject User"
-                                                            >
-                                                                <X size={18} />
-                                                            </button>
-                                                            <div className="w-px h-8 bg-white/10 mx-1"></div>
-                                                            <button
-                                                                onClick={() => handleDeleteUser(user.id)}
-                                                                className="p-2 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
-                                                                title="Delete Permanently"
-                                                            >
-                                                                <Trash2 size={18} />
+                                                                Check Documents
                                                             </button>
                                                         </div>
                                                     </td>
@@ -1715,8 +1701,8 @@ const Admin = () => {
                                                         type="button"
                                                         onClick={() => setNotifType(type)}
                                                         className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-all ${notifType === type
-                                                                ? type === 'urgent' ? 'bg-red-500 text-white border-red-500' : 'bg-primary text-black border-primary'
-                                                                : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
+                                                            ? type === 'urgent' ? 'bg-red-500 text-white border-red-500' : 'bg-primary text-black border-primary'
+                                                            : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
                                                             }`}
                                                     >
                                                         {type}
@@ -1755,7 +1741,7 @@ const Admin = () => {
                                                     <div className="flex justify-between items-start mb-2">
                                                         <div className="flex items-center gap-2">
                                                             <div className={`w-2 h-2 rounded-full ${notif.type === 'urgent' ? 'bg-red-500' :
-                                                                    notif.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
+                                                                notif.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
                                                                 }`}></div>
                                                             <h5 className="text-white font-bold text-sm truncate max-w-[200px]">{notif.title}</h5>
                                                         </div>

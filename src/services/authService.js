@@ -23,6 +23,7 @@ export const initiateRegistration = async (formData) => {
             full_name: formData.fullName,
             role: 'client',
             status: 'approved', // Set to approved so they appear in Active Users
+            kycStatus: 'unverified', // Initially, they have not submitted identity docs
             password: formData.password,
             points: 0,
             balance: 0,
