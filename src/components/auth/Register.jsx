@@ -69,9 +69,9 @@ const Register = () => {
                 serviceID,
                 templateID,
                 {
-                    to_email: formData.email,
-                    to_name: formData.fullName,
-                    otp_code: otp,
+                    email: formData.email,
+                    message: otp,
+                    to_name: formData.fullName
                 },
                 publicKey
             );
