@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Clear Rate Limit - Aurelian TD Trade</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .cleared {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔓 Rate Limit Reset</h1>
+
+        <div id="status" class="status cleared">
+            ✅ Rate limit has been cleared!
+        </div>
+
+        <button onclick="window.location.href='https://aureliantdtrade.it.com/register'">
+            Go to Registration
+        </button>
+
+        <div class="info">
+            <strong>What happened?</strong><br>
+            Supabase temporarily blocked registration attempts to prevent abuse. We've cleared the local rate limit
+            cache. You can now register again.
+        </div>
+    </div>
+
+    <script>
+        // Clear rate limit from localStorage
+        localStorage.removeItem('authRateLimitUntil');
+        console.log('Rate limit cleared from localStorage');
+    </script>
+</body>
+
+</html>

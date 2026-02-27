@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode (Default) */
+    --color-primary: #D4AF37;
+    --color-primary-light: #FFD700;
+    --color-primary-dark: #996515;
+
+    --color-background-main: #F8FAFC;
+    /* Light gray/white background */
+    --color-background-base: #FFFFFF;
+    /* White for cards */
+    --color-surface-main: #FFFFFF;
+    --color-surface-light: #F1F5F9;
+    --color-surface-highlight: #E2E8F0;
+
+    --color-text-main: #0F172A;
+    /* Slate 900 */
+    --color-text-muted: #64748B;
+    /* Slate 500 */
+    --color-text-subtle: #94A3B8;
+    /* Slate 400 */
+
+    --color-border-subtle: rgba(15, 23, 42, 0.06);
+    --color-border-gold: rgba(212, 175, 55, 0.4);
+
+    /* Functional Colors (Same for both usually, maybe slight adjust) */
+    --color-success: #00D26A;
+    --color-danger: #F92C2C;
+    --color-warning: #F59E0B;
+    --color-info: #3B82F6;
+
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, #BF953F 0%, #FCF6BA 45%, #B38728 100%);
+    --gradient-gold-hover: linear-gradient(135deg, #D4AF37 0%, #FDD835 45%, #996515 100%);
+    --gradient-main: linear-gradient(to bottom right, #F8FAFC, #E2E8F0);
+  }
+
+  .dark {
+    /* Dark Mode */
+    --color-primary: #D4AF37;
+    --color-primary-light: #FFD700;
+    --color-primary-dark: #996515;
+
+    --color-background-main: #020408;
+    --color-background-base: #080C14;
+    --color-surface-main: #0F1420;
+    --color-surface-light: #1A202E;
+    --color-surface-highlight: #252B3B;
+
+    --color-text-main: #FFFFFF;
+    --color-text-muted: #9CA3AF;
+    --color-text-subtle: #6B7280;
+
+    --color-border-subtle: rgba(255, 255, 255, 0.06);
+    --color-border-gold: rgba(212, 175, 55, 0.25);
+
+    --color-success: #00D26A;
+    --color-danger: #F92C2C;
+    --color-warning: #F59E0B;
+    --color-info: #3B82F6;
+
+    --gradient-gold: linear-gradient(135deg, #BF953F 0%, #FCF6BA 45%, #B38728 100%);
+    --gradient-gold-hover: linear-gradient(135deg, #D4AF37 0%, #FDD835 45%, #996515 100%);
+    --gradient-main: radial-gradient(circle at center, #1a202e 0%, #020408 100%);
+  }
+}
+
+@layer utilities {
+
+  /* Mobile Input Zoom Fix */
+  @media screen and (max-width: 768px) {
+
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  .glass-panel {
+    @apply bg-surface-dark backdrop-blur-xl border border-border-subtle shadow-glass hover:border-border-gold transition-all duration-300 rounded-3xl;
+  }
+
+  .glass-panel-hover {
+    @apply hover:bg-surface-light hover:border-primary hover:shadow-glow transition-all duration-300;
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-gold bg-[length:200%_auto] animate-shine;
+  }
+
+  .bg-gradient-gold-text {
+    @apply bg-gradient-gold;
+  }
+
+  .text-gold-link {
+    @apply text-transparent bg-clip-text bg-gradient-to-b from-[#FBF5B7] via-[#FFD700] to-[#E6B800] drop-shadow-sm hover:brightness-110 transition-all;
+  }
+
+  .btn-gold {
+    @apply bg-gradient-gold text-black font-display font-bold uppercase tracking-wider hover:shadow-glow hover:brightness-110 transition-all duration-300 active:scale-95 px-6 py-3 rounded-2xl;
+  }
+
+  .nav-link {
+    @apply text-text-muted hover:text-white transition-all duration-300 font-bold text-sm tracking-wide uppercase font-display relative;
+  }
+
+  .nav-link::after {
+    content: '';
+    @apply absolute -bottom-1 left-0 w-0 h-[2px] bg-gradient-gold transition-all duration-300 opacity-80 shadow-glow;
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+
+  /* Premium Utilities */
+  .fade-up {
+    @apply opacity-0 translate-y-8 animate-slide-up;
+  }
+}
+
+/* Base Styles */
+body {
+  @apply bg-background-dark text-text-subtle font-sans antialiased selection:bg-primary selection:text-black overflow-x-hidden min-h-screen bg-gradient-dark bg-fixed;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020408;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1A202E;
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D4AF37;
+}
+
+/* Global Animations */
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}

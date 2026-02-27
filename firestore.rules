@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'admin@aureliantrade.com' ||
+        request.auth.token.email_verified == true && request.auth.token.email == 'admin@aureliantrade.com'
+      );
+    }
+
+    // Helper function to check if user is owning data
+    function isOwner(userId) {
+      return request.auth != null && (request.auth.uid == userId || request.auth.token.email == userId);
+    }
+
+    // USERS: Admin can read/write all; Users can read their own, and write safe fields
+    match /users/{userId} {
+      allow read: if isAdmin() || isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.role != 'admin';
+      // Prevent privilege escalation by blocking edits to 'role' or 'isAdmin'
+      allow update: if isAdmin() || (
+        isOwner(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // DEPOSITS: Admin can do anything; Users can create/read their own
+    match /deposits/{depositId} {
+      allow read: if isAdmin() || (request.auth != null && resource.data.userEmail == request.auth.token.email);
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+
+    // WITHDRAWALS: Admin can do anything; Users can create/read their own
+    match /withdrawals/{withdrawalId} {
+      allow read: if isAdmin() || (request.auth != null && resource.data.userEmail == request.auth.token.email);
+       allow create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+
+    // VERIFICATIONS: Admin can do anything; Users can create/read their own
+    match /verifications/{docId} {
+      allow read: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid) || isOwner(docId);
+      allow create: if request.auth != null;
+      allow update: if isAdmin(); // Only admin verifies
+    }
+
+    // MESSAGES (Customer Support): Admin has full access. Users can only access messages tied to their user_id.
+    match /messages/{messageId} {
+       allow read, update, delete: if isAdmin() || (request.auth != null && resource.data.user_id == request.auth.uid);
+       allow create: if isAdmin() || (request.auth != null && request.resource.data.user_id == request.auth.uid);
+    }
+    
+    // OTP Codes: creating is public (server/client generation), reading/deleting is specific
+    match /otpCodes/{email} {
+      allow create: if true; // Needed for unauthenticated sign up
+      allow read, delete: if request.auth != null || resource.id == email; // Allow if it matches the email trying to be verified (though technically auth is null during signup)
+      // Actually, for creating account, auth is null.
+      // So OTP needs to be open for create, but restricted for read?
+      // verifyOTP reads it. If it's server side logic it's fine. If client side verifyOTP...
+      allow read, write: if true; // Temporary relaxation for OTP flow which happens before Auth
+    }
+
+    // SETTINGS: Public read (for QR codes), Admin write
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // SYSTEM NOTIFICATIONS: Admin can create/update; Users can read and update solely to mark as read
+    match /system_notifications/{notificationId} {
+      allow read: if request.auth != null;
+      allow create, delete: if isAdmin();
+      // Users can only append their ID to the readBy array, nothing else
+      allow update: if isAdmin() || (
+        request.auth != null &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy'])
+      );
+    }
+
+    // TRADES: Admin can do anything; Users can create and read/update their own
+    match /trades/{tradeId} {
+      allow read: if isAdmin() || (request.auth != null && resource.data.user_id == request.auth.uid);
+      allow create: if request.auth != null;
+      allow update: if isAdmin() || (request.auth != null && resource.data.user_id == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Default deny all others
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

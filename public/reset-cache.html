@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resetting Application...</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #000;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .loader {
+            border: 4px solid #333;
+            border-top: 4px solid #D4AF37;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loader"></div>
+    <h2>Updating Application...</h2>
+    <p>Clearing old data and refreshing...</p>
+    <script>
+        async function resetAndReload() {
+            try {
+                console.log('Starting reset...');
+
+                // 1. Unregister Service Workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                        console.log('Unregistered SW:', registration);
+                    }
+                }
+
+                // 2. Clear Cache Storage
+                if ('caches' in window) {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(key => caches.delete(key)));
+                    console.log('Cleared Caches');
+                }
+
+                // 3. Clear Local Storage Version
+                localStorage.removeItem('app_version');
+
+                // 4. Force Reload to Home with timestamp
+                setTimeout(() => {
+                    window.location.href = '/?t=' + Date.now();
+                }, 1000);
+
+            } catch (e) {
+                console.error(e);
+                // Fallback
+                window.location.href = '/?fallback=' + Date.now();
+            }
+        }
+
+        resetAndReload();
+    </script>
+</body>
+
+</html>
