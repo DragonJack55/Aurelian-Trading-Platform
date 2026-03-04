@@ -328,7 +328,7 @@ const Trading = () => {
     }, []);
 
     return (
-        <div className="flex flex-col h-[calc(100vh-100px)] bg-background-base text-gray-900 dark:text-gray-300 overflow-hidden">
+        <div className="flex flex-col h-[calc(100vh-100px)] bg-background-base text-gray-900 dark:text-gray-300 overflow-hidden overflow-x-hidden max-w-[100vw]">
             {/* Asset Selection Menu - Overlay */}
             <div className={`fixed inset-y-0 left-0 w-80 bg-surface-light dark:bg-surface-dark z-[2000] transform transition-transform duration-300 shadow-2xl border-r border-border-light dark:border-border-gold/20 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-6 border-b border-border-light dark:border-border-gold/20 flex justify-between items-center bg-gray-50 dark:bg-surface-dark">
@@ -360,20 +360,20 @@ const Trading = () => {
             {isMenuOpen && <div onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1900]"></div>}
 
             {/* Top Bar for Chart Controls */}
-            <div className="px-6 py-3 bg-background-base border-b border-border-light dark:border-border-subtle flex justify-between items-center shadow-lg relative z-20">
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-4 cursor-pointer group" onClick={() => setIsMenuOpen(true)}>
-                        <div className="p-2 -ml-2 rounded-lg hover:bg-surface-light/10 transition-colors">
-                            <Menu size={24} className="text-gray-400 group-hover:text-primary transition-colors" />
+            <div className="px-3 lg:px-6 py-3 bg-background-base border-b border-border-light dark:border-border-subtle flex justify-between items-center shadow-lg relative z-20 overflow-hidden">
+                <div className="flex items-center gap-3 lg:gap-6 min-w-0 flex-shrink">
+                    <div className="flex items-center gap-2 lg:gap-4 cursor-pointer group min-w-0 flex-shrink" onClick={() => setIsMenuOpen(true)}>
+                        <div className="p-1.5 lg:p-2 -ml-1 rounded-lg hover:bg-surface-light/10 transition-colors flex-shrink-0">
+                            <Menu size={20} className="text-gray-400 group-hover:text-primary transition-colors" />
                         </div>
-                        <div className="flex items-center gap-4">
-                            <img src={activeSymbol.logo} alt={activeSymbol.name} className="w-9 h-9 rounded-full shadow-lg border border-white/5 group-hover:scale-105 transition-transform" />
-                            <div>
-                                <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="font-display font-bold text-lg text-gray-900 dark:text-white tracking-wide">{activeSymbol.name}</span>
-                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary/10 text-primary uppercase tracking-wider border border-primary/20">{activeSymbol.type}</span>
+                        <div className="flex items-center gap-2 lg:gap-4 min-w-0">
+                            <img src={activeSymbol.logo} alt={activeSymbol.name} className="w-7 h-7 lg:w-9 lg:h-9 rounded-full shadow-lg border border-white/5 group-hover:scale-105 transition-transform flex-shrink-0" />
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 lg:gap-2 mb-0.5">
+                                    <span className="font-display font-bold text-sm lg:text-lg text-gray-900 dark:text-white tracking-wide truncate">{activeSymbol.name}</span>
+                                    <span className="px-1 lg:px-1.5 py-0.5 rounded text-[8px] lg:text-[9px] font-bold bg-primary/10 text-primary uppercase tracking-wider border border-primary/20 flex-shrink-0">{activeSymbol.type}</span>
                                 </div>
-                                <div className={`text-sm font-mono font-bold ${parseFloat(price.c) >= parseFloat(price.P) ? 'text-success' : 'text-danger'}`}>
+                                <div className={`text-xs lg:text-sm font-mono font-bold ${parseFloat(price.c) >= parseFloat(price.P) ? 'text-success' : 'text-danger'}`}>
                                     ${price.c}
                                 </div>
                             </div>
@@ -398,13 +398,13 @@ const Trading = () => {
                     )}
                 </div>
 
-                <div className="flex bg-surface-dark rounded-lg p-1.5 gap-1 border border-white/5">
+                <div className="flex bg-surface-dark rounded-lg p-1 lg:p-1.5 gap-0.5 lg:gap-1 border border-white/5 flex-shrink-0">
                     {['1m', '5m', '15m', '1h', '4h', '1d'].map(tf => (
                         (!isMobile || ['1m', '15m', '1h'].includes(tf)) && (
                             <button
                                 key={tf}
                                 onClick={() => setSelectedTimeframe(tf)}
-                                className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${selectedTimeframe === tf
+                                className={`px-2 lg:px-4 py-1.5 rounded-md text-[10px] lg:text-xs font-bold transition-all ${selectedTimeframe === tf
                                     ? 'bg-gradient-gold text-black shadow-glow'
                                     : 'text-text-muted hover:text-white hover:bg-white/5'
                                     }`}
@@ -427,7 +427,7 @@ const Trading = () => {
                 {/* 2. Trading Controls */}
                 <div className="w-full lg:w-[340px] bg-white dark:bg-surface-dark z-10 flex flex-col border-l border-gray-200 dark:border-border-gold/10 shadow-xl overflow-y-auto custom-scrollbar">
 
-                    <div className="p-6 space-y-6">
+                    <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
                         {/* Time Setting */}
                         <div>
                             <div className="text-[10px] font-bold text-text-muted uppercase mb-3 flex items-center gap-2">
