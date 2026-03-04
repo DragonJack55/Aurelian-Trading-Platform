@@ -8,7 +8,7 @@ const Navbar = ({ isDarkMode, toggleTheme }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [appVersion, setAppVersion] = useState('v2.0.2');
+    const [appVersion, setAppVersion] = useState('v2.1.0');
     const { user } = useApp();
 
     useEffect(() => {
@@ -16,13 +16,14 @@ const Navbar = ({ isDarkMode, toggleTheme }) => {
         fetch('/version.json?t=' + Date.now())
             .then(res => res.json())
             .then(data => setAppVersion('v' + data.version))
-            .catch(() => setAppVersion('v2.0.2')); // Fallback
+            .catch(() => setAppVersion('v2.1.0')); // Fallback
     }, []);
 
     const navItems = [
         { name: 'Home', path: '/', icon: 'home' },
         { name: 'Market', path: '/market', icon: 'candlestick_chart' },
         { name: 'Trade', path: '/trade', icon: 'sync_alt' },
+        { name: 'Leaders', path: '/leaderboard', icon: 'workspace_premium' },
         { name: 'Assets', path: '/assets', icon: 'wallet' },
         // { name: 'Learn', path: '#', icon: 'school' } // Placeholder - commented until content is ready
     ];
@@ -115,7 +116,7 @@ const Navbar = ({ isDarkMode, toggleTheme }) => {
                                     </div>
                                     <div className="hidden md:block text-left">
                                         <div className="text-xs text-text-muted font-medium">Welcome</div>
-                                        <div className="text-sm font-bold text-white max-w-[100px] truncate">
+                                        <div className="text-sm font-bold text-gray-900 dark:text-white max-w-[100px] truncate">
                                             {getDisplayName(user?.full_name || user.user_metadata?.full_name || user.email)}
                                         </div>
                                     </div>
@@ -126,16 +127,16 @@ const Navbar = ({ isDarkMode, toggleTheme }) => {
                                 {/* Dropdown Menu */}
                                 <div className="absolute right-0 top-full mt-2 w-48 bg-surface-dark border border-border-gold rounded-xl shadow-glass opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right z-50">
                                     <div className="py-2">
-                                        <Link to="/security" className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-primary transition-colors">
+                                        <Link to="/security" className="block px-4 py-2 text-sm text-text-muted hover:bg-primary/10 hover:text-text-main transition-colors">
                                             My Profile
                                         </Link>
-                                        <Link to="/security" className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-primary transition-colors">
+                                        <Link to="/security" className="block px-4 py-2 text-sm text-text-muted hover:bg-primary/10 hover:text-text-main transition-colors">
                                             Security
                                         </Link>
                                         <div className="h-px bg-white/10 my-1"></div>
                                         <button
                                             onClick={handleLogout}
-                                            className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-white/5 transition-colors"
+                                            className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-danger/10 transition-colors"
                                         >
                                             Sign Out
                                         </button>

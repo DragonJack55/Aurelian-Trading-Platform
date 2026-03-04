@@ -1,7 +1,6 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import {
@@ -13,11 +12,11 @@ import {
     Headset, MessageSquare, Ticket, CheckSquare, BarChart, LogIn, Eye, EyeOff, ChevronLeft
 } from 'lucide-react';
 import { subscribeToConversations, sendMessage } from '../services/messageService';
-import { subscribeToAllUsers, updateUserStatus, updateUserPoints, updateUserTradeResult, getUsersPaginated, updateUserFreezeStatus, incrementUserPoints, resetUserPassword, markUserAsSeen } from '../services/userService';
+import { subscribeToAllUsers, updateUserPoints, updateUserTradeResult, getUsersPaginated, updateUserFreezeStatus, incrementUserPoints, resetUserPassword, markUserAsSeen } from '../services/userService';
 import { updateVerificationStatus, getVerificationsPaginated, subscribeToAllVerifications } from '../services/verificationService';
 import { getDepositSettings, updateDepositSettings, updateDepositStatus, subscribeToAllDeposits } from '../services/depositService';
 import { updateWithdrawalStatus, getWithdrawalsPaginated, subscribeToAllWithdrawals } from '../services/withdrawalService';
-import { loginAdmin, logout } from '../services/authService';
+import { logout } from '../services/authService';
 import { sendSystemNotification, subscribeToAllSystemNotifications, deleteSystemNotification } from '../services/notificationService';
 import ConfirmationModal from '../components/ConfirmationModal';
 import RejectionModal from '../components/RejectionModal';
@@ -233,6 +232,29 @@ const Admin = () => {
         }
     });
 
+    // Compute Dashboard Statistics
+    const totalDespositsAmount = (depositRequests || [])
+        .filter(d => d.status === 'approved')
+        .reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+
+    const totalWithdrawalsAmount = (withdrawals || [])
+        .filter(w => w.status === 'approved')
+        .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0);
+
+    const totalUsersBalance = (users || [])
+        .filter(u => u.role !== 'admin')
+        .reduce((sum, u) => sum + (parseFloat(u.balance) || 0), 0);
+
+    const chartData = [
+        { date: 'Mon', volume: 4500, profit: 2100, losses: 1200 },
+        { date: 'Tue', volume: 5200, profit: 3400, losses: 800 },
+        { date: 'Wed', volume: 3800, profit: 1800, losses: 1500 },
+        { date: 'Thu', volume: 6100, profit: 4200, losses: 900 },
+        { date: 'Fri', volume: 5500, profit: 2900, losses: 1100 },
+        { date: 'Sat', volume: 4800, profit: 3800, losses: 600 },
+        { date: 'Sun', volume: 5900, profit: 4500, losses: 400 }
+    ];
+
     // Helper functions
     const handleSaveDepositSettings = async () => {
         setIsSavingSettings(true);
@@ -373,15 +395,7 @@ const Admin = () => {
         }
     };
 
-    const approveUser = async (userId) => {
-        const user = users.find(u => u.id === userId);
-        if (user && user.email) await updateUserStatus(user.email, 'approved');
-    };
 
-    const rejectUser = async (userId) => {
-        const user = users.find(u => u.id === userId);
-        if (user && user.email) await updateUserStatus(user.email, 'rejected');
-    };
 
     const handleDeleteUser = (userId) => {
         setConfirmation({
@@ -776,7 +790,7 @@ const Admin = () => {
                     <p className="text-[10px] text-gray-600 font-mono opacity-50">v1.9</p>
                     <button
                         onClick={handleLogout}
-                        className={`w-full py-3 ${isSidebarCollapsed ? 'px-2 justify-center' : 'px-4 justify-center gap-2'} bg - red - 500/10 hover: bg - red - 500/20 border border - red - 500/20 hover: border - red - 500/30 rounded-xl text-red-200 text-sm font-semibold flex items-center transition-all duration-300 group`}
+                        className={`w-full py-3 ${isSidebarCollapsed ? 'px-2 justify-center' : 'px-4 justify-center gap-2'} bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 rounded-xl text-red-200 text-sm font-semibold flex items-center transition-all duration-300 group`}
                         title={isSidebarCollapsed ? "Sign Out" : ""}
                     >
                         <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
@@ -1558,7 +1572,6 @@ const Admin = () => {
                                 )}
                                 {conversations.map(conv => {
                                     const unread = conv.unread || 0;
-                                    const userEmail = conv.userEmail;
                                     return (
                                         <div
                                             key={conv.userEmail}

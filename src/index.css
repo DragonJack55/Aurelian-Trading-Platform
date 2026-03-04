@@ -106,7 +106,7 @@
   }
 
   .nav-link {
-    @apply text-text-muted hover:text-white transition-all duration-300 font-bold text-sm tracking-wide uppercase font-display relative;
+    @apply text-text-muted hover:text-text-main transition-all duration-300 font-bold text-sm tracking-wide uppercase font-display relative;
   }
 
   .nav-link::after {

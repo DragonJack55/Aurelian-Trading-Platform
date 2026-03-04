@@ -1,54 +1,51 @@
 
 // Map symbols to icon URLs
 export const getIconUrl = (symbol) => {
-    const base = 'https://cryptologos.cc/logos';
-    if (symbol.includes('BTC')) return `${base}/bitcoin-btc-logo.png?v=026`;
-    if (symbol.includes('ETH')) return `${base}/ethereum-eth-logo.png?v=026`;
-    if (symbol.includes('XAU')) return 'https://cdn-icons-png.flaticon.com/512/121/121796.png'; // Gold
-    if (symbol.includes('XAG')) return 'https://cdn-icons-png.flaticon.com/512/121/121796.png'; // Silver (Reuse gold or find silver)
-    if (symbol.includes('EUR')) return 'https://cdn-icons-png.flaticon.com/512/197/197560.png'; // Euro
-    if (symbol.includes('LTC')) return `${base}/litecoin-ltc-logo.png?v=026`;
-    if (symbol.includes('XRP')) return `${base}/xrp-xrp-logo.png?v=026`;
-    if (symbol.includes('ADA')) return `${base}/cardano-ada-logo.png?v=026`;
-    if (symbol.includes('DOGE')) return `${base}/dogecoin-doge-logo.png?v=026`;
-    if (symbol.includes('SHIB')) return `${base}/shiba-inu-shib-logo.png?v=026`;
-    if (symbol.includes('EOS')) return `${base}/eos-eos-logo.png?v=026`;
-    if (symbol.includes('ETC')) return `${base}/ethereum-classic-etc-logo.png?v=026`;
-    if (symbol.includes('SOL')) return `${base}/solana-sol-logo.png?v=026`;
-    if (symbol.includes('BNB')) return `${base}/bnb-bnb-logo.png?v=026`;
-    if (symbol.includes('AVAX')) return `${base}/avalanche-avax-logo.png?v=026`;
-    if (symbol.includes('DOT')) return `${base}/polkadot-new-dot-logo.png?v=026`;
-    if (symbol.includes('TRX')) return `${base}/tron-trx-logo.png?v=026`;
-    if (symbol.includes('TON')) return `${base}/toncoin-ton-logo.png?v=026`;
-    if (symbol.includes('LINK')) return `${base}/chainlink-link-logo.png?v=026`;
-    if (symbol.includes('ATOM')) return `${base}/cosmos-atom-logo.png?v=026`;
-    if (symbol.includes('NEAR')) return `${base}/near-protocol-near-logo.png?v=026`;
-    if (symbol.includes('ICP')) return `${base}/internet-computer-icp-logo.png?v=026`;
-    if (symbol.includes('MATIC')) return `${base}/polygon-matic-logo.png?v=026`;
-    if (symbol.includes('UNI')) return `${base}/uniswap-uni-logo.png?v=026`;
-    if (symbol.includes('BCH')) return `${base}/bitcoin-cash-bch-logo.png?v=026`;
-    if (symbol.includes('OKB')) return `${base}/okb-okb-logo.png?v=026`;
-    if (symbol.includes('USDT')) return `${base}/tether-usdt-logo.png?v=026`;
-    if (symbol.includes('USDC')) return `${base}/usd-coin-usdc-logo.png?v=026`;
+    // Standardize symbol for lookups
+    const baseSymbol = symbol.replace(/USDT|USD|_PERP/g, '').toLowerCase();
 
-    // Added icons
-    if (symbol.includes('APT')) return `${base}/aptos-apt-logo.png?v=026`;
-    if (symbol.includes('FIL')) return `${base}/filecoin-fil-logo.png?v=026`;
-    if (symbol.includes('IMX')) return `${base}/immutable-x-imx-logo.png?v=026`;
-    if (symbol.includes('STX')) return `${base}/stacks-stx-logo.png?v=026`;
-    if (symbol.includes('XLM')) return `${base}/stellar-xlm-logo.png?v=026`;
-    if (symbol.includes('VET')) return `${base}/vechain-vet-logo.png?v=026`;
-    if (symbol.includes('INJ')) return `${base}/injective-inj-logo.png?v=026`;
-    if (symbol.includes('RNDR')) return `${base}/render-token-rndr-logo.png?v=026`;
-    if (symbol.includes('OP')) return `${base}/optimism-ethereum-op-logo.png?v=026`;
-    if (symbol.includes('ARB')) return `${base}/arbitrum-arb-logo.png?v=026`;
-    if (symbol.includes('AAVE')) return `${base}/aave-aave-logo.png?v=026`;
-    if (symbol.includes('ALGO')) return `${base}/algorand-algo-logo.png?v=026`;
-    if (symbol.includes('HBAR')) return `${base}/hedera-hbar-logo.png?v=026`;
-    if (symbol.includes('MKR')) return `${base}/maker-mkr-logo.png?v=026`;
-    if (symbol.includes('AUD')) return 'https://cdn-icons-png.flaticon.com/512/197/197505.png'; // AUD
+    // Mapping for assets that don't match the standard coin-icon pattern or need specific styles
+    const specialIcons = {
+        // Metals
+        'xau': 'https://cdn-icons-png.flaticon.com/512/2881/2881045.png',
+        'xag': 'https://cdn-icons-png.flaticon.com/512/2451/2451551.png',
+        // Forex (country flags)
+        'eur': 'https://flagcdn.com/w80/eu.png',
+        'aud': 'https://flagcdn.com/w80/au.png',
+        // Stablecoins
+        'usdt': 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
+        'usdc': 'https://assets.coingecko.com/coins/images/6319/small/usdc.png',
+        // Major alts missing from spothq CDN
+        'ton': 'https://assets.coingecko.com/coins/images/17980/small/ton_symbol.png',
+        'shib': 'https://assets.coingecko.com/coins/images/11939/small/shiba.png',
+        'pepe': 'https://assets.coingecko.com/coins/images/29850/small/pepe-token.jpeg',
+        'iota': 'https://assets.coingecko.com/coins/images/692/small/IOTA_Swirl.png',
+        'op': 'https://assets.coingecko.com/coins/images/25244/small/Optimism.png',
+        'ldo': 'https://assets.coingecko.com/coins/images/13573/small/Lido_DAO.png',
+        'pol': 'https://assets.coingecko.com/coins/images/4713/small/polygon.png',
+        'matic': 'https://assets.coingecko.com/coins/images/4713/small/polygon.png',
+        'ape': 'https://assets.coingecko.com/coins/images/24383/small/apecoin.jpg',
+        'apt': 'https://assets.coingecko.com/coins/images/26455/small/aptos_round.png',
+        'arb': 'https://assets.coingecko.com/coins/images/16547/small/arb.jpg',
+        'imx': 'https://assets.coingecko.com/coins/images/17233/small/immutableX-symbol-BLK-RGB.png',
+        'inj': 'https://assets.coingecko.com/coins/images/12882/small/Secondary_Symbol.png',
+        'rndr': 'https://assets.coingecko.com/coins/images/11636/small/rndr.png',
+        'near': 'https://assets.coingecko.com/coins/images/10365/small/near.jpg',
+        'stx': 'https://assets.coingecko.com/coins/images/2069/small/Stacks_logo_full.png',
+        'hbar': 'https://assets.coingecko.com/coins/images/3688/small/hbar.png',
+        'soy': 'https://cdn-icons-png.flaticon.com/512/6001/6001527.png',
+        'soyu': 'https://cdn-icons-png.flaticon.com/512/6001/6001527.png',
+        'yfi': 'https://assets.coingecko.com/coins/images/11849/small/yearn.jpg',
+        'etc': 'https://assets.coingecko.com/coins/images/453/small/ethereum-classic-logo.png',
+        // Indices & Commodities
+        'us30': 'https://flagcdn.com/w80/us.png',
+        'ukoil': 'https://flagcdn.com/w80/gb.png',
+    };
 
-    return 'https://cdn-icons-png.flaticon.com/512/6001/6001368.png'; // Generic
+    if (specialIcons[baseSymbol]) return specialIcons[baseSymbol];
+
+    // Default to a high-quality crypto icon CDN
+    return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${baseSymbol}.png`;
 };
 
 export const assets = [

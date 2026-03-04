@@ -58,9 +58,9 @@ const Leaderboard = () => {
     const getRankStyle = (index) => {
         switch (index) {
             case 0: return "bg-gradient-to-r from-yellow-500/20 to-yellow-600/5 border-yellow-500/30 shadow-[0_4px_20px_rgba(234,179,8,0.15)] transform hover:-translate-y-1 transition-all z-10 relative";
-            case 1: return "bg-gradient-to-r from-gray-300/10 to-gray-400/5 border-gray-400/20";
-            case 2: return "bg-gradient-to-r from-amber-700/10 to-amber-800/5 border-amber-700/20";
-            default: return "bg-[#131b2f]/50 border-white/5 hover:bg-[#131b2f] transition-colors";
+            case 1: return "bg-gradient-to-r from-gray-300/10 to-gray-400/5 border-border-subtle";
+            case 2: return "bg-gradient-to-r from-amber-700/10 to-amber-800/5 border-border-subtle";
+            default: return "bg-surface-light border-border-subtle hover:bg-surface-highlight transition-colors";
         }
     };
 
@@ -77,9 +77,9 @@ const Leaderboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0a0f1c] text-slate-300 pb-20 relative pt-[80px]">
+        <div className="min-h-screen bg-background-main text-text-main pb-20 relative pt-[80px]">
             {/* Background elements */}
-            <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/10 via-[#0a0f1c] to-[#0a0f1c] pointer-events-none"></div>
+            <div className="fixed inset-0 z-0 bg-gradient-dark pointer-events-none"></div>
 
             <div className="max-w-4xl mx-auto px-4 relative z-10 animate-fade-in">
 
@@ -90,7 +90,7 @@ const Leaderboard = () => {
                         <Award size={32} className="text-black" />
                         <Sparkles size={16} className="text-white absolute -top-2 -right-2 animate-pulse" />
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 font-display">
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-4 font-display">
                         Global <span className="text-transparent bg-clip-text bg-gradient-brand">Leaderboard</span>
                     </h1>
                     <p className="text-gray-400 text-lg max-w-2xl mx-auto">
@@ -99,7 +99,7 @@ const Leaderboard = () => {
                 </div>
 
                 {/* Leaderboard Container */}
-                <div className="bg-[#131b2f]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-4 md:p-8 shadow-2xl relative overflow-hidden">
+                <div className="bg-surface-main/80 backdrop-blur-xl border border-border-subtle rounded-3xl p-4 md:p-8 shadow-2xl relative overflow-hidden">
 
                     {/* Top 3 Decorative Header */}
                     <div className="flex justify-between text-xs md:text-sm font-bold text-gray-500 uppercase tracking-widest px-4 md:px-6 mb-4 mt-2">
@@ -135,7 +135,7 @@ const Leaderboard = () => {
                                                     ${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-black shadow-lg shadow-yellow-500/30' :
                                                         index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-black' :
                                                             index === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-800 text-white' :
-                                                                'bg-gray-800 text-gray-400 group-hover:bg-gray-700'
+                                                                'bg-surface-highlight text-text-muted group-hover:bg-primary/20'
                                                     }
                                                 `}>
                                                     {user.isVIP ? <Star size={18} className={index < 3 ? 'text-black/80' : 'text-primary'} fill="currentColor" /> : <User size={20} />}
@@ -148,7 +148,7 @@ const Leaderboard = () => {
                                             </div>
 
                                             <div>
-                                                <div className={`font-bold text-base md:text-lg tracking-wide ${index === 0 ? 'text-yellow-400' : 'text-white'}`}>
+                                                <div className={`font-bold text-base md:text-lg tracking-wide ${index === 0 ? 'text-yellow-400' : 'text-gray-900 dark:text-white'}`}>
                                                     {maskName(user.name || user.email)}
                                                 </div>
                                                 <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">

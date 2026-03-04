@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Menu, X, User, Plus, Settings2, Maximize2, Camera } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { subscribeToTicker } from '../services/binance';
+import { getIconUrl } from '../data/assets';
 
 const OrderBook = lazy(() => import('../components/OrderBook'));
 const TradingViewWidget = lazy(() => import('../components/TradingViewWidget'));
@@ -27,14 +28,42 @@ const investmentOptions = [
 ];
 
 const assets = [
-    { symbol: 'BTCUSDT', name: 'BTC/USDT', tvSymbol: 'BINANCE:BTCUSDT', type: 'crypto', logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png' },
-    { symbol: 'XAUUSD', name: 'XAU/USD', tvSymbol: 'BINANCE:PAXGUSDT', type: 'forex', logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/5705.png' },
-    { symbol: 'ETHUSDT', name: 'ETH/USDT', tvSymbol: 'BINANCE:ETHUSDT', type: 'crypto', logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png' },
-    { symbol: 'EURUSD', name: 'EUR/USD', tvSymbol: 'BINANCE:EURUSDT', type: 'forex', logo: 'https://flagcdn.com/w40/eu.png' },
-    { symbol: 'AUDUSD', name: 'AUD/USD', tvSymbol: 'BINANCE:AUDUSDT', type: 'forex', logo: 'https://flagcdn.com/w40/au.png' },
-    { symbol: 'XAGUSD', name: 'XAG/USD', tvSymbol: 'BINANCE:XAGUSDT', type: 'forex', logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3053.png' },
-    { symbol: 'US30', name: 'US30', tvSymbol: 'BINANCE:BTCUSDT', type: 'index', logo: 'https://flagcdn.com/w40/us.png' },
-    { symbol: 'UKOIL', name: 'UKOIL', tvSymbol: 'BINANCE:LTCUSDT', type: 'commodity', logo: 'https://flagcdn.com/w40/gb.png' },
+    // Top Cryptos
+    { symbol: 'BTCUSDT', name: 'BTC/USDT', tvSymbol: 'BINANCE:BTCUSDT', type: 'crypto', logo: getIconUrl('BTCUSDT') },
+    { symbol: 'ETHUSDT', name: 'ETH/USDT', tvSymbol: 'BINANCE:ETHUSDT', type: 'crypto', logo: getIconUrl('ETHUSDT') },
+    { symbol: 'SOLUSDT', name: 'SOL/USDT', tvSymbol: 'BINANCE:SOLUSDT', type: 'crypto', logo: getIconUrl('SOLUSDT') },
+
+    // Requested Pairs
+    { symbol: 'BCHUSDT', name: 'BCH/USDT', tvSymbol: 'BINANCE:BCHUSDT', type: 'crypto', logo: getIconUrl('BCHUSDT') },
+    { symbol: 'LTCUSDT', name: 'LTC/USDT', tvSymbol: 'BINANCE:LTCUSDT', type: 'crypto', logo: getIconUrl('LTCUSDT') },
+    { symbol: 'ADAUSDT', name: 'ADA/USDT', tvSymbol: 'BINANCE:ADAUSDT', type: 'crypto', logo: getIconUrl('ADAUSDT') },
+    { symbol: 'ALGOUSDT', name: 'ALGO/USDT', tvSymbol: 'BINANCE:ALGOUSDT', type: 'crypto', logo: getIconUrl('ALGOUSDT') }, // Assuming A/USDT is ALGO or AAVE based on price
+    { symbol: 'IOTAUSDT', name: 'IOTA/USDT', tvSymbol: 'BINANCE:IOTAUSDT', type: 'crypto', logo: getIconUrl('IOTAUSDT') },
+    { symbol: 'OPUSDT', name: 'OP/USDT', tvSymbol: 'BINANCE:OPUSDT', type: 'crypto', logo: getIconUrl('OPUSDT') },
+    { symbol: 'APEUSDT', name: 'APE/USDT', tvSymbol: 'BINANCE:APEUSDT', type: 'crypto', logo: getIconUrl('APEUSDT') },
+    { symbol: 'DOTUSDT', name: 'DOT/USDT', tvSymbol: 'BINANCE:DOTUSDT', type: 'crypto', logo: getIconUrl('DOTUSDT') },
+    { symbol: 'FILUSDT', name: 'FIL/USDT', tvSymbol: 'BINANCE:FILUSDT', type: 'crypto', logo: getIconUrl('FILUSDT') },
+    { symbol: 'LDOUSDT', name: 'LDO/USDT', tvSymbol: 'BINANCE:LDOUSDT', type: 'crypto', logo: getIconUrl('LDOUSDT') },
+    { symbol: 'POLUSDT', name: 'POL/USDT', tvSymbol: 'BINANCE:POLUSDT', type: 'crypto', logo: getIconUrl('POLUSDT') },
+    { symbol: 'SOYUSDT', name: 'SOYU/USDT', tvSymbol: 'KUCOIN:SOYUSDT', type: 'crypto', logo: getIconUrl('SOYUSDT') }, // Alternative exchange if needed
+    { symbol: 'TRXUSDT', name: 'TRX/USDT', tvSymbol: 'BINANCE:TRXUSDT', type: 'crypto', logo: getIconUrl('TRXUSDT') },
+    { symbol: 'UNIUSDT', name: 'UNI/USDT', tvSymbol: 'BINANCE:UNIUSDT', type: 'crypto', logo: getIconUrl('UNIUSDT') },
+    { symbol: 'XRPUSDT', name: 'XRP/USDT', tvSymbol: 'BINANCE:XRPUSDT', type: 'crypto', logo: getIconUrl('XRPUSDT') },
+    { symbol: 'YFIUSDT', name: 'YFI/USDT', tvSymbol: 'BINANCE:YFIUSDT', type: 'crypto', logo: getIconUrl('YFIUSDT') },
+    { symbol: 'ATOMUSDT', name: 'ATOM/USDT', tvSymbol: 'BINANCE:ATOMUSDT', type: 'crypto', logo: getIconUrl('ATOMUSDT') },
+    { symbol: 'AVAXUSDT', name: 'AVAX/USDT', tvSymbol: 'BINANCE:AVAXUSDT', type: 'crypto', logo: getIconUrl('AVAXUSDT') },
+    { symbol: 'DOGEUSDT', name: 'DOGE/USDT', tvSymbol: 'BINANCE:DOGEUSDT', type: 'crypto', logo: getIconUrl('DOGEUSDT') },
+    { symbol: 'LINKUSDT', name: 'LINK/USDT', tvSymbol: 'BINANCE:LINKUSDT', type: 'crypto', logo: getIconUrl('LINKUSDT') },
+    { symbol: 'SHIBUSDT', name: 'SHIB/USDT', tvSymbol: 'BINANCE:SHIBUSDT', type: 'crypto', logo: getIconUrl('SHIBUSDT') },
+    { symbol: 'ETCUSDT', name: 'ETC/USDT', tvSymbol: 'BINANCE:ETCUSDT', type: 'crypto', logo: getIconUrl('ETCUSDT') },
+
+    // Top Forex & Metals & Indices
+    { symbol: 'XAUUSD', name: 'XAU/USD', tvSymbol: 'OANDA:XAUUSD', type: 'forex', logo: getIconUrl('XAUUSD') },
+    { symbol: 'XAGUSD', name: 'XAG/USD', tvSymbol: 'OANDA:XAGUSD', type: 'forex', logo: getIconUrl('XAGUSD') },
+    { symbol: 'EURUSD', name: 'EUR/USD', tvSymbol: 'OANDA:EURUSD', type: 'forex', logo: getIconUrl('EURUSD') },
+    { symbol: 'AUDUSD', name: 'AUD/USD', tvSymbol: 'OANDA:AUDUSD', type: 'forex', logo: getIconUrl('AUDUSD') },
+    { symbol: 'US30', name: 'US30', tvSymbol: 'CAPITALCOM:US30', type: 'index', logo: 'https://flagcdn.com/w40/us.png' },
+    { symbol: 'UKOIL', name: 'UKOIL', tvSymbol: 'CAPITALCOM:UKOIL', type: 'commodity', logo: 'https://flagcdn.com/w40/gb.png' },
 ];
 
 const Trading = () => {
@@ -341,7 +370,7 @@ const Trading = () => {
                             <img src={activeSymbol.logo} alt={activeSymbol.name} className="w-9 h-9 rounded-full shadow-lg border border-white/5 group-hover:scale-105 transition-transform" />
                             <div>
                                 <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="font-display font-bold text-lg text-white tracking-wide">{activeSymbol.name}</span>
+                                    <span className="font-display font-bold text-lg text-gray-900 dark:text-white tracking-wide">{activeSymbol.name}</span>
                                     <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary/10 text-primary uppercase tracking-wider border border-primary/20">{activeSymbol.type}</span>
                                 </div>
                                 <div className={`text-sm font-mono font-bold ${parseFloat(price.c) >= parseFloat(price.P) ? 'text-success' : 'text-danger'}`}>
@@ -355,11 +384,11 @@ const Trading = () => {
                         <div className="flex gap-8 text-xs font-medium border-l border-white/5 pl-8 ml-2 h-8 items-center">
                             <div className="flex flex-col justify-between h-full">
                                 <span className="text-[9px] uppercase tracking-widest text-text-subtle font-bold">24h High</span>
-                                <span className="text-gray-200 font-mono text-[11px]">{price.h}</span>
+                                <span className="text-gray-700 dark:text-gray-200 font-mono text-[11px]">{price.h}</span>
                             </div>
                             <div className="flex flex-col justify-between h-full">
                                 <span className="text-[9px] uppercase tracking-widest text-text-subtle font-bold">24h Low</span>
-                                <span className="text-gray-200 font-mono text-[11px]">{price.l}</span>
+                                <span className="text-gray-700 dark:text-gray-200 font-mono text-[11px]">{price.l}</span>
                             </div>
                             <div className="flex flex-col justify-between h-full">
                                 <span className="text-[9px] uppercase tracking-widest text-text-subtle font-bold">24h Vol</span>
@@ -409,8 +438,8 @@ const Trading = () => {
                                 {investmentOptions.map((option, index) => (
                                     <button key={index} onClick={() => setSelectedTime(index)}
                                         className={`p-3 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all duration-200 ${selectedTime === index
-                                            ? 'bg-primary/10 border-primary/50 text-white shadow-glow-strong'
-                                            : 'bg-white/5 border-transparent hover:border-white/10 text-gray-400'
+                                            ? 'bg-primary/10 border-primary/50 text-gray-900 dark:text-white shadow-glow-strong'
+                                            : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-transparent hover:border-primary/30 dark:hover:border-white/10 text-gray-600 dark:text-gray-400'
                                             }`}
                                     >
                                         <span className="text-sm font-bold">{option.time.split(' ')[0]}s</span>
@@ -434,14 +463,14 @@ const Trading = () => {
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
                                     placeholder={`Min ${minAmount}`}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg py-3 px-4 pr-16 text-white font-bold focus:outline-none focus:border-primary/50 transition-colors placeholder-gray-500"
+                                    className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg py-3 px-4 pr-16 text-gray-900 dark:text-white font-bold focus:outline-none focus:border-primary/50 transition-colors placeholder-gray-400 dark:placeholder-gray-500"
                                 />
                                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-primary-dark dark:text-primary">USDT</span>
                             </div>
                         </div>
 
                         {/* Est. Yield */}
-                        <div className="bg-white/5 p-4 rounded-xl border border-white/10 flex justify-between items-center shadow-inner relative overflow-hidden">
+                        <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10 flex justify-between items-center shadow-inner relative overflow-hidden">
                             {currentUser?.isVIP && (
                                 <div className="absolute top-0 right-0 bg-primary text-black text-[8px] font-bold px-2 py-0.5 rounded-bl-lg shadow-glow-sm">
                                     VIP BONUS (+5%)
@@ -503,10 +532,10 @@ const Trading = () => {
                                     </div>
                                 ) : (
                                     activeTrades.map(trade => (
-                                        <div key={trade.id} className="bg-white/5 p-3 rounded-lg border border-white/5 shadow-sm relative overflow-hidden group">
+                                        <div key={trade.id} className="bg-gray-100 dark:bg-white/5 p-3 rounded-lg border border-gray-200 dark:border-white/5 shadow-sm relative overflow-hidden group">
                                             <div className="absolute top-0 left-0 w-1 h-full bg-primary"></div>
                                             <div className="flex justify-between mb-1">
-                                                <span className="font-bold text-xs text-white">{trade.symbol}</span>
+                                                <span className="font-bold text-xs text-gray-900 dark:text-white">{trade.symbol}</span>
                                                 <span className="text-xs font-mono font-bold text-primary">{trade.remainingTime}s</span>
                                             </div>
                                             <div className="flex justify-between items-center text-xs">
@@ -527,9 +556,9 @@ const Trading = () => {
                                 )
                             ) : (
                                 historyTrades.slice(0, 10).map(trade => (
-                                    <div key={trade.id} className="bg-white/5 p-3 rounded-lg border border-white/5 shadow-sm opacity-80 hover:opacity-100 transition-opacity">
+                                    <div key={trade.id} className="bg-gray-100 dark:bg-white/5 p-3 rounded-lg border border-gray-200 dark:border-white/5 shadow-sm opacity-80 hover:opacity-100 transition-opacity">
                                         <div className="flex justify-between mb-1">
-                                            <span className="font-bold text-xs text-white">{trade.symbol}</span>
+                                            <span className="font-bold text-xs text-gray-900 dark:text-white">{trade.symbol}</span>
                                             <span className={`font-bold text-xs ${trade.result >= 0 ? 'text-success' : 'text-danger'}`}>
                                                 {trade.result >= 0 ? '+' : ''}{trade.result.toFixed(2)}
                                             </span>

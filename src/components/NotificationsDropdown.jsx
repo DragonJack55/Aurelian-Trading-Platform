@@ -69,7 +69,7 @@ const NotificationsDropdown = () => {
             {isOpen && (
                 <div className="fixed sm:absolute right-4 sm:right-0 top-16 sm:top-full mt-2 w-80 max-h-[80vh] sm:max-h-96 overflow-y-auto bg-surface-dark border border-border-gold rounded-xl shadow-glass z-[100] animate-fade-in custom-scrollbar">
                     <div className="p-4 border-b border-white/10 flex justify-between items-center sticky top-0 bg-surface-dark/95 backdrop-blur-md z-10">
-                        <h3 className="text-white font-bold text-sm uppercase tracking-wider">Notifications</h3>
+                        <h3 className="text-gray-900 dark:text-white font-bold text-sm uppercase tracking-wider">Notifications</h3>
                         {unreadCount > 0 && (
                             <button
                                 onClick={handleMarkAllAsRead}
@@ -95,12 +95,12 @@ const NotificationsDropdown = () => {
                                         onClick={() => handleMarkAsRead(notif)}
                                     >
                                         <div className="flex justify-between items-start mb-1 gap-2">
-                                            <span className={`font-bold text-sm leading-tight ${isUnread ? 'text-primary' : 'text-gray-300'}`}>
+                                            <span className={`font-bold text-sm leading-tight ${isUnread ? 'text-primary' : 'text-gray-900 dark:text-gray-300'}`}>
                                                 {notif.title}
                                             </span>
-                                            <span className="text-[9px] text-gray-500 whitespace-nowrap mt-0.5">{formatTime(notif.createdAt)}</span>
+                                            <span className="text-[9px] text-gray-400 dark:text-gray-500 whitespace-nowrap mt-0.5">{formatTime(notif.createdAt)}</span>
                                         </div>
-                                        <p className="text-xs text-gray-400 mt-1 leading-relaxed">{notif.message}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{notif.message}</p>
                                     </div>
                                 )
                             })

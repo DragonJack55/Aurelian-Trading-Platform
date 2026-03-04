@@ -90,7 +90,7 @@ const Quotes = () => {
       <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-white mb-8 pt-6">Markets</h1>
 
       {/* Tabs */}
-      <div className="flex gap-6 border-b border-white/10 mb-6 overflow-x-auto">
+      <div className="flex gap-6 border-b border-gray-200 dark:border-white/10 mb-6 overflow-x-auto">
         {['Favorites', 'Crypto', 'Spot', 'Futures', 'Options'].map((tab) => (
           <button
             key={tab}
@@ -113,8 +113,8 @@ const Quotes = () => {
               key={sub}
               onClick={() => setActiveSubTab(sub)}
               className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${activeSubTab === sub
-                ? 'bg-white/10 text-white'
-                : 'text-gray-400 hover:bg-white/5'
+                ? 'bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white'
+                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'
                 }`}
             >
               {sub}
@@ -140,10 +140,10 @@ const Quotes = () => {
                   <div key={asset.symbol} className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
                       <img src={getIconUrl(asset.symbol)} className="w-8 h-8" onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/6001/6001368.png' }} />
-                      <span className="font-bold text-white">{asset.sub}</span>
+                      <span className="font-bold text-gray-900 dark:text-white">{asset.sub}</span>
                     </div>
                     <div className="text-right">
-                      <div className="text-white font-medium">{asset.price}</div>
+                      <div className="text-gray-900 dark:text-white font-medium">{asset.price}</div>
                       <div className={`text-xs ${asset.change.startsWith('-') ? 'text-accent-red' : 'text-accent-green'}`}>{asset.change}</div>
                     </div>
                   </div>
@@ -151,9 +151,9 @@ const Quotes = () => {
               </div>
             </div>
 
-            <div className="flex-1 bg-surface-dark/40 backdrop-blur-md border border-white/5 rounded-2xl p-6">
+            <div className="flex-1 bg-white dark:bg-surface-dark/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-2xl p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-white">New Listings</h3>
+                <h3 className="font-bold text-gray-900 dark:text-white">New Listings</h3>
               </div>
               <div className="space-y-4">
                 {[
@@ -165,7 +165,7 @@ const Quotes = () => {
                     <div className="flex items-center gap-3">
                       <img src={item.icon} className="w-8 h-8 rounded-full" />
                       <div>
-                        <div className="font-bold text-white text-sm">{item.s}</div>
+                        <div className="font-bold text-gray-900 dark:text-white text-sm">{item.s}</div>
                         <div className="flex gap-1">
                           {item.tags.map(tag => (
                             <span key={tag} className={`text-[9px] px-1 rounded ${tag === 'Perp' ? 'bg-amber-900/40 text-amber-500' : 'bg-white/10 text-gray-400'}`}>{tag}</span>
@@ -174,7 +174,7 @@ const Quotes = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-white font-medium">{item.p}</div>
+                      <div className="text-gray-900 dark:text-white font-medium">{item.p}</div>
                       <div className={`text-xs ${item.c.startsWith('-') ? 'text-accent-red' : 'text-accent-green'}`}>{item.c}</div>
                     </div>
                   </div>
@@ -189,7 +189,7 @@ const Quotes = () => {
       {activeTab === 'Favorites' ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredAssets.map((asset) => (
-            <div key={asset.symbol} className="group relative overflow-hidden bg-surface-dark/40 backdrop-blur-md border border-white/5 p-5 rounded-2xl flex items-center justify-between transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:bg-surface-dark/60 hover:border-primary/50 hover:shadow-[0_8px_30px_rgb(255,215,0,0.1)] cursor-pointer">
+            <div key={asset.symbol} className="group relative overflow-hidden bg-white dark:bg-surface-dark/40 backdrop-blur-md border border-gray-200 dark:border-white/5 p-5 rounded-2xl flex items-center justify-between transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:bg-gray-50 dark:hover:bg-surface-dark/60 hover:border-primary/50 hover:shadow-[0_8px_30px_rgb(255,215,0,0.1)] cursor-pointer">
               {/* Hover Gradient Effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -203,7 +203,7 @@ const Quotes = () => {
                   />
                 </div>
                 <div>
-                  <div className="font-display font-bold text-white text-lg group-hover:text-primary transition-colors duration-300">{asset.name.split('/')[0]}</div>
+                  <div className="font-display font-bold text-gray-900 dark:text-white text-lg group-hover:text-primary transition-colors duration-300">{asset.name.split('/')[0]}</div>
                   <div className="text-xs text-gray-400 font-medium tracking-wide uppercase group-hover:text-gray-300 transition-colors">{asset.sub}</div>
                 </div>
               </div>

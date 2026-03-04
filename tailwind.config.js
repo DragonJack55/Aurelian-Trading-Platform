@@ -57,10 +57,21 @@ export default {
             animation: {
                 'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                 'float': 'float 6s ease-in-out infinite',
+                'float-slow': 'floatSlow 8s ease-in-out infinite',
+                'float-medium': 'floatMedium 6s ease-in-out infinite',
+                'float-fast': 'floatFast 4s ease-in-out infinite',
                 'shine': 'shine 3s linear infinite',
                 'slide-up': 'slideUp 0.5s ease-out forwards',
+                'spin-slow': 'spin 20s linear infinite',
+                'spin-slower': 'spin 30s linear infinite',
+                'spin-reverse-slow': 'spinReverse 20s linear infinite',
+                'spin-reverse-slower': 'spinReverse 30s linear infinite',
             },
             keyframes: {
+                spinReverse: {
+                    from: { transform: 'rotate(360deg)' },
+                    to: { transform: 'rotate(0deg)' },
+                },
                 shine: {
                     '0%': { backgroundPosition: '200% center' },
                     '100%': { backgroundPosition: '-200% center' },
@@ -68,6 +79,18 @@ export default {
                 float: {
                     '0%, 100%': { transform: 'translateY(0)' },
                     '50%': { transform: 'translateY(-10px)' },
+                },
+                floatSlow: {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-20px)' },
+                },
+                floatMedium: {
+                    '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+                    '50%': { transform: 'translateY(-15px) rotate(5deg)' },
+                },
+                floatFast: {
+                    '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+                    '50%': { transform: 'translateY(-25px) rotate(-10deg)' },
                 },
                 slideUp: {
                     '0%': { transform: 'translateY(20px)', opacity: '0' },
