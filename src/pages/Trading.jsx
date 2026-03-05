@@ -421,7 +421,7 @@ const Trading = () => {
 
                 {/* 1. Chart Section */}
                 <div className="flex-1 bg-gray-50 dark:bg-background-base relative border-b lg:border-r border-gray-200 dark:border-border-subtle h-[400px] lg:h-auto z-0">
-                    <TradingViewWidget symbol={activeSymbol.tvSymbol} interval={selectedTimeframe} theme="dark" />
+                    <TradingViewWidget symbol={activeSymbol.tvSymbol} interval={selectedTimeframe} />
                 </div>
 
                 {/* 2. Trading Controls */}

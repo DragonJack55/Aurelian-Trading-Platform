@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 const OrderBook = ({ price }) => {
     const [asks, setAsks] = useState([]);
@@ -6,6 +7,17 @@ const OrderBook = ({ price }) => {
     const [lastDisplayPrice, setLastDisplayPrice] = useState(price || '0.00');
     const [activeTab, setActiveTab] = useState('book'); // 'book' or 'trades'
     const [recentTrades, setRecentTrades] = useState([]);
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
+    // Theme-aware colors
+    const colors = {
+        bg: isDark ? '#131722' : '#ffffff',
+        border: isDark ? '#2a2e39' : '#e5e7eb',
+        textPrimary: isDark ? '#EAECEF' : '#1f2937',
+        textSecondary: isDark ? '#848E9C' : '#6b7280',
+        headerBg: isDark ? '#131722' : '#f9fafb',
+    };
 
     // Ref to track latest display price for the interval closure without triggering re-runs
     const displayPriceRef = useRef(price || '0.00');
@@ -39,7 +51,6 @@ const OrderBook = ({ price }) => {
         setBids(newBids);
     }, []);
 
-    // Sync Drift Logic moved to Interval to prevent infinite loops
     // High-frequency visuals update loop (150ms ~ 6-7fps)
     useEffect(() => {
         const interval = setInterval(() => {
@@ -57,18 +68,6 @@ const OrderBook = ({ price }) => {
             };
             setAsks(prev => prev.map(updateRow));
             setBids(prev => prev.map(updateRow));
-
-            // 2. CHECK DRIFT & REGENERATE IF NEEDED
-            // We do this inside the interval instead of a separate useEffect to ensure it doesn't loop infinitely
-            if (price) {
-                const target = parseFloat(price);
-                // Accessing current state in interval is tricky, we can rely on displayPriceRef or just check lazily
-                // Actually, for regeneration, we need the *real* current asks. 
-                // Since accessing state inside interval closure gets stale values without dependency,
-                // we'll skip the complex regen logic here and trust the randomness + `price` prop updates.
-                // If we really need regen, we should use a Ref to store 'asks' or just use a very slow separate effect.
-                // Let's just USE THE PRICE PROP directly to sync display price.
-            }
 
             // 3. UPDATE TRADES
             if (activeTab === 'trades' || Math.random() > 0.7) {
@@ -92,9 +91,8 @@ const OrderBook = ({ price }) => {
                 setLastDisplayPrice(prev => {
                     const p = parseFloat(prev);
                     const target = parseFloat(price);
-                    // Drift towards target
                     if (Math.abs(p - target) > 0.5) {
-                        return price; // Snap if too far
+                        return price;
                     }
                     if (Math.random() > 0.5) return price;
                     return prev;
@@ -104,18 +102,10 @@ const OrderBook = ({ price }) => {
         }, 150);
 
         return () => clearInterval(interval);
-    }, [price, activeTab]); // Safe dependencies
+    }, [price, activeTab]);
 
-    // Re-generation effect that is SAFE (only depends on price, not asks)
     useEffect(() => {
         if (!price) return;
-        // If price changes significantly (e.g. symbol switch), we regenerate
-        // We can't easily check 'current center vs price' here without 'asks' dependency.
-        // But we can check if the change is huge from the *previous* price prop (if we tracked it).
-        // For now, let's just rely on the initial mount + manual interval drift updates.
-        // If the user switches symbols, the 'key' (if set on parent) would remount this component.
-        // If not, we might ideally want to clear/regen. 
-        // Let's assume the parent keys the component by symbol or we just let it drift.
     }, [price]);
 
     const Row = ({ item, type }) => (
@@ -137,8 +127,8 @@ const OrderBook = ({ price }) => {
                 zIndex: 0
             }} />
             <span className="mono-font" style={{ color: type === 'ask' ? '#f6465d' : '#0ecb81', zIndex: 1, textAlign: 'left', fontWeight: '500' }}>{item.price}</span>
-            <span className="mono-font" style={{ color: '#EAECEF', zIndex: 1, textAlign: 'right', opacity: 0.9 }}>{item.amount}</span>
-            <span className="mono-font" style={{ color: '#848E9C', zIndex: 1, textAlign: 'right' }}>{item.total}</span>
+            <span className="mono-font" style={{ color: colors.textPrimary, zIndex: 1, textAlign: 'right', opacity: 0.9 }}>{item.amount}</span>
+            <span className="mono-font" style={{ color: colors.textSecondary, zIndex: 1, textAlign: 'right' }}>{item.total}</span>
         </div>
     );
 
@@ -149,32 +139,32 @@ const OrderBook = ({ price }) => {
             padding: '2px 12px',
             fontSize: '11px',
             lineHeight: '18px',
-            borderBottom: '1px solid rgba(255,255,255,0.02)'
+            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.04)'}`
         }}>
             <span className="mono-font" style={{ color: item.type === 'buy' ? '#0ecb81' : '#f6465d', textAlign: 'left', fontWeight: '500' }}>{item.price}</span>
-            <span className="mono-font" style={{ color: '#EAECEF', textAlign: 'right', opacity: 0.9 }}>{item.amount}</span>
-            <span className="mono-font" style={{ color: '#848E9C', textAlign: 'right' }}>{item.time}</span>
+            <span className="mono-font" style={{ color: colors.textPrimary, textAlign: 'right', opacity: 0.9 }}>{item.amount}</span>
+            <span className="mono-font" style={{ color: colors.textSecondary, textAlign: 'right' }}>{item.time}</span>
         </div>
     );
 
     return (
         <div style={{
-            background: '#131722',
+            background: colors.bg,
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            borderLeft: '1px solid #2a2e39',
+            borderLeft: `1px solid ${colors.border}`,
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
         }}>
             {/* Header / Tabs */}
-            <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', height: '40px', borderBottom: '1px solid #2a2e39', gap: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', height: '40px', borderBottom: `1px solid ${colors.border}`, gap: '20px' }}>
                 <span
                     onClick={() => setActiveTab('book')}
                     style={{
                         fontSize: '13px',
                         fontWeight: '600',
-                        color: activeTab === 'book' ? '#EAECEF' : '#848E9C',
+                        color: activeTab === 'book' ? colors.textPrimary : colors.textSecondary,
                         borderBottom: activeTab === 'book' ? '2px solid #F0B90B' : '2px solid transparent',
                         height: '100%',
                         display: 'flex',
@@ -188,7 +178,7 @@ const OrderBook = ({ price }) => {
                     style={{
                         fontSize: '13px',
                         fontWeight: '600',
-                        color: activeTab === 'trades' ? '#EAECEF' : '#848E9C',
+                        color: activeTab === 'trades' ? colors.textPrimary : colors.textSecondary,
                         borderBottom: activeTab === 'trades' ? '2px solid #F0B90B' : '2px solid transparent',
                         height: '100%',
                         display: 'flex',
@@ -201,7 +191,7 @@ const OrderBook = ({ price }) => {
             {activeTab === 'book' ? (
                 <>
                     {/* Order Book View */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '35% 30% 35%', padding: '8px 12px', fontSize: '10px', color: '#848E9C', fontWeight: '600' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '35% 30% 35%', padding: '8px 12px', fontSize: '10px', color: colors.textSecondary, fontWeight: '600' }}>
                         <span style={{ textAlign: 'left' }}>Price(USDT)</span>
                         <span style={{ textAlign: 'right' }}>Amount</span>
                         <span style={{ textAlign: 'right' }}>Total</span>
@@ -217,13 +207,13 @@ const OrderBook = ({ price }) => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
-                        background: '#131722',
-                        borderTop: '1px solid #2a2e39',
-                        borderBottom: '1px solid #2a2e39'
+                        background: colors.headerBg,
+                        borderTop: `1px solid ${colors.border}`,
+                        borderBottom: `1px solid ${colors.border}`
                     }}>
                         {lastDisplayPrice}
                         <span className="mono-font" style={{ fontSize: '14px' }}>{parseFloat(lastDisplayPrice) >= parseFloat(price || 0) ? '↑' : '↓'}</span>
-                        <span style={{ fontSize: '12px', color: '#EAECEF', fontWeight: 'normal', marginLeft: 'auto' }}>
+                        <span style={{ fontSize: '12px', color: colors.textPrimary, fontWeight: 'normal', marginLeft: 'auto' }}>
                             ≈ ${lastDisplayPrice}
                         </span>
                     </div>
@@ -234,7 +224,7 @@ const OrderBook = ({ price }) => {
             ) : (
                 <>
                     {/* Recent Trades View */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '35% 35% 30%', padding: '8px 12px', fontSize: '10px', color: '#848E9C', fontWeight: '600' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '35% 35% 30%', padding: '8px 12px', fontSize: '10px', color: colors.textSecondary, fontWeight: '600' }}>
                         <span style={{ textAlign: 'left' }}>Price(USDT)</span>
                         <span style={{ textAlign: 'right' }}>Amount</span>
                         <span style={{ textAlign: 'right' }}>Time</span>

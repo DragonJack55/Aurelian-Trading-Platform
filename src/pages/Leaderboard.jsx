@@ -79,7 +79,7 @@ const Leaderboard = () => {
     return (
         <div className="min-h-screen bg-background-main text-text-main pb-20 relative pt-[80px]">
             {/* Background elements */}
-            <div className="fixed inset-0 z-0 bg-gradient-dark pointer-events-none"></div>
+            <div className="fixed inset-0 z-0 bg-gradient-to-b from-transparent to-gray-100/50 dark:to-black/20 pointer-events-none"></div>
 
             <div className="max-w-4xl mx-auto px-4 relative z-10 animate-fade-in">
 
@@ -91,7 +91,7 @@ const Leaderboard = () => {
                         <Sparkles size={16} className="text-white absolute -top-2 -right-2 animate-pulse" />
                     </div>
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-4 font-display">
-                        Global <span className="text-transparent bg-clip-text bg-gradient-brand">Leaderboard</span>
+                        Global <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-amber-500">Leaderboard</span>
                     </h1>
                     <p className="text-gray-400 text-lg max-w-2xl mx-auto">
                         Track the performance of top traders worldwide. Climb the ranks by increasing your overall portfolio value through successful trades.
