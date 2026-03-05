@@ -342,7 +342,7 @@ const Trading = () => {
                         <div key={asset.symbol} onClick={() => { setActiveSymbol(asset); setIsMenuOpen(false); }}
                             className={`p-4 rounded-xl flex items-center gap-3 cursor-pointer transition-all border ${activeSymbol.symbol === asset.symbol
                                 ? 'bg-primary/10 border-primary/40'
-                                : 'bg-white dark:bg-surface-light/5 border-transparent hover:border-gray-200 dark:hover:border-white/10'
+                                : 'bg-white dark:bg-white/5 border-transparent hover:border-gray-200 dark:hover:border-white/10'
                                 }`}
                         >
                             <img src={asset.logo} alt={asset.name} className="w-8 h-8 rounded-full shadow-sm" />
