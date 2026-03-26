@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const cors = require('cors')({ origin: true });
+const axios = require('axios');
 
 // Initialize Firebase Admin
 admin.initializeApp();
@@ -238,6 +239,20 @@ exports.deleteUser = functions.https.onRequest((req, res) => {
 });
 
 // ─── SERVER-SIDE TRADE EXECUTION ──────────────────────────────────────────────
+
+/**
+ * Verify Firebase Auth token from request header.
+ * Returns the decoded user if valid, throws otherwise.
+ */
+async function verifyAuth(req) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        throw new Error('Missing or invalid authorization header');
+    }
+    const idToken = authHeader.split('Bearer ')[1];
+    return await auth.verifyIdToken(idToken);
+}
+
 /**
  * Executes Trade Securely
  * 
@@ -363,244 +378,4 @@ exports.executeTradeNode = functions
         });
     });
 
-// ─── TERABOX STORAGE PROXY ──────────────────────────────────────────────
-
-const Busboy = require('busboy');
-const TeraboxUploader = require('terabox-upload-tool');
-const os = require('os');
-const path = require('path');
-const fs = require('fs');
-
-/**
- * Get TeraBox uploader instance from environment variables.
- * Credentials are stored in functions/.env file:
- *   TERABOX_NDUS, TERABOX_JSTOKEN, TERABOX_APPID
- */
-function getTeraboxClient() {
-    const ndus = process.env.TERABOX_NDUS;
-    const jsToken = process.env.TERABOX_JSTOKEN;
-    const appId = process.env.TERABOX_APPID || '250528';
-
-    if (!ndus || !jsToken) {
-        throw new Error('TeraBox credentials not configured. Add TERABOX_NDUS and TERABOX_JSTOKEN to functions/.env');
-    }
-    return new TeraboxUploader({
-        ndus,
-        jsToken,
-        appId,
-    });
-}
-
-/**
- * Verify Firebase Auth token from request header.
- * Returns the decoded user if valid, throws otherwise.
- */
-async function verifyAuth(req) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new Error('Missing or invalid authorization header');
-    }
-    const idToken = authHeader.split('Bearer ')[1];
-    return await auth.verifyIdToken(idToken);
-}
-
-/**
- * Upload a file to TeraBox.
- *
- * POST with multipart/form-data:
- *   - file: the file to upload
- *   - remotePath (optional): target directory in TeraBox (default: /newaura/{userId}/)
- *
- * Headers: Authorization: Bearer <firebase_id_token>
- *
- * Returns: { success, fsId, remotePath, fileName, fileSize }
- */
-exports.teraboxUpload = functions
-    .runWith({ timeoutSeconds: 300, memory: '512MB' })
-    .https.onRequest((req, res) => {
-        cors(req, res, async () => {
-            if (req.method !== 'POST') {
-                return res.status(405).json({ success: false, error: 'Method not allowed' });
-            }
-
-            let decodedToken;
-            try {
-                decodedToken = await verifyAuth(req);
-            } catch (authErr) {
-                return res.status(401).json({ success: false, error: authErr.message });
-            }
-
-            const userId = decodedToken.uid;
-
-            // Parse multipart form data
-            const busboy = Busboy({ headers: req.headers });
-            let tmpFilePath = null;
-            let fileName = null;
-            let fileSize = 0;
-            let customRemotePath = null;
-
-            const filePromise = new Promise((resolve, reject) => {
-                busboy.on('file', (fieldname, file, info) => {
-                    fileName = info.filename;
-                    tmpFilePath = path.join(os.tmpdir(), `${Date.now()}_${fileName}`);
-                    const writeStream = fs.createWriteStream(tmpFilePath);
-
-                    file.on('data', (data) => {
-                        fileSize += data.length;
-                    });
-
-                    file.pipe(writeStream);
-
-                    writeStream.on('finish', resolve);
-                    writeStream.on('error', reject);
-                });
-
-                busboy.on('field', (fieldname, val) => {
-                    if (fieldname === 'remotePath') customRemotePath = val;
-                });
-
-                busboy.on('finish', () => {
-                    if (!tmpFilePath) reject(new Error('No file uploaded'));
-                });
-
-                busboy.on('error', reject);
-            });
-
-            // For Cloud Functions, the raw body is in req.rawBody
-            if (req.rawBody) {
-                busboy.end(req.rawBody);
-            } else {
-                req.pipe(busboy);
-            }
-
-            try {
-                await filePromise;
-
-                const remotePath = customRemotePath || `/newaura/${userId}/`;
-                const client = getTeraboxClient();
-
-                console.log(`Uploading ${fileName} (${fileSize} bytes) to TeraBox at ${remotePath}`);
-
-                const result = await client.uploadFile(
-                    tmpFilePath,
-                    (loaded, total) => {
-                        console.log(`Upload progress: ${Math.round((loaded / total) * 100)}%`);
-                    },
-                    remotePath
-                );
-
-                // Clean up temp file
-                fs.unlinkSync(tmpFilePath);
-
-                console.log(`Upload complete for ${fileName}:`, JSON.stringify(result));
-
-                res.json({
-                    success: true,
-                    fsId: result.fs_id || result.data?.fs_id || null,
-                    remotePath: `${remotePath}${fileName}`,
-                    fileName,
-                    fileSize,
-                    result,
-                });
-
-            } catch (error) {
-                console.error('TeraBox upload error:', error);
-                // Clean up temp file on error
-                if (tmpFilePath && fs.existsSync(tmpFilePath)) {
-                    fs.unlinkSync(tmpFilePath);
-                }
-                res.status(500).json({ success: false, error: error.message });
-            }
-        });
-    });
-
-/**
- * Get a download link for a TeraBox file.
- *
- * POST with JSON body: { fsId: string }
- * Headers: Authorization: Bearer <firebase_id_token>
- *
- * Returns: { success, downloadLink }
- */
-exports.teraboxDownload = functions
-    .runWith({ timeoutSeconds: 60, memory: '256MB' })
-    .https.onRequest((req, res) => {
-        cors(req, res, async () => {
-            if (req.method !== 'POST') {
-                return res.status(405).json({ success: false, error: 'Method not allowed' });
-            }
-
-            try {
-                await verifyAuth(req);
-            } catch (authErr) {
-                return res.status(401).json({ success: false, error: authErr.message });
-            }
-
-            try {
-                const { fsId } = req.body;
-                if (!fsId) {
-                    return res.status(400).json({ success: false, error: 'fsId is required' });
-                }
-
-                const client = getTeraboxClient();
-                const result = await client.downloadFile(fsId);
-
-                console.log(`Download link generated for fsId ${fsId}`);
-
-                res.json({
-                    success: true,
-                    downloadLink: result.downloadLink || result.dlink || null,
-                    result,
-                });
-
-            } catch (error) {
-                console.error('TeraBox download error:', error);
-                res.status(500).json({ success: false, error: error.message });
-            }
-        });
-    });
-
-/**
- * Delete a file from TeraBox.
- *
- * POST with JSON body: { filePaths: string[] }
- *   e.g. { filePaths: ["/newaura/uid123/document.pdf"] }
- *
- * Headers: Authorization: Bearer <firebase_id_token>
- *
- * Returns: { success }
- */
-exports.teraboxDelete = functions
-    .runWith({ timeoutSeconds: 60, memory: '256MB' })
-    .https.onRequest((req, res) => {
-        cors(req, res, async () => {
-            if (req.method !== 'POST') {
-                return res.status(405).json({ success: false, error: 'Method not allowed' });
-            }
-
-            try {
-                await verifyAuth(req);
-            } catch (authErr) {
-                return res.status(401).json({ success: false, error: authErr.message });
-            }
-
-            try {
-                const { filePaths } = req.body;
-                if (!filePaths || !Array.isArray(filePaths) || filePaths.length === 0) {
-                    return res.status(400).json({ success: false, error: 'filePaths array is required' });
-                }
-
-                const client = getTeraboxClient();
-                const result = await client.deleteFiles(filePaths);
-
-                console.log(`Deleted ${filePaths.length} file(s) from TeraBox`);
-
-                res.json({ success: true, result });
-
-            } catch (error) {
-                console.error('TeraBox delete error:', error);
-                res.status(500).json({ success: false, error: error.message });
-            }
-        });
-    });
-
+// ─── END SERVER-SIDE TRADE EXECUTION ──────────────────────────────────────

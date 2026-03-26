@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Eye, EyeOff, Shield, Wallet, Download, Headphones,
     ArrowDownCircle, ArrowLeftRight, RefreshCcw, Gift,
-    CreditCard, ChevronRight
+    CreditCard, ChevronRight, Globe, Check
 } from 'lucide-react';
 import WithdrawModal from '../components/WithdrawModal';
 import DepositModal from '../components/DepositModal';
@@ -13,7 +13,7 @@ import BindAddressModal from '../components/BindAddressModal';
 import { useApp } from '../context/AppContext';
 import { getVerificationStatus } from '../services/verificationService';
 
-const MenuItem = ({ icon: IconComponent, title, onClick, isLast }) => (
+const MenuItem = ({ icon: DynamicIcon, title, onClick, isLast }) => (
     <div
         onClick={onClick}
         className={`p-5 flex justify-between items-center cursor-pointer transition-colors hover:bg-black/5 dark:hover:bg-white/5 ${!isLast ? 'border-b border-gray-100 dark:border-white/5' : ''}`}
@@ -21,7 +21,7 @@ const MenuItem = ({ icon: IconComponent, title, onClick, isLast }) => (
         <div className="flex items-center">
             <div className="w-1 h-6 bg-gradient-gold rounded mr-4 shadow-gold-sm"></div>
             <div className="mr-3 text-primary-dark dark:text-primary">
-                <IconComponent size={22} />
+                {React.createElement(DynamicIcon, { size: 22 })}
             </div>
             <span className="text-gray-900 dark:text-white font-medium text-base">
                 {title}
@@ -31,9 +31,21 @@ const MenuItem = ({ icon: IconComponent, title, onClick, isLast }) => (
     </div>
 );
 
+// Helper function to manage Google Translate cookie (avoids React Compiler warnings)
+const setGoogleTranslateCookie = (code, googleCode) => {
+    const hostname = window.location.hostname;
+    if (code === 'en') {
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + hostname;
+    } else if (googleCode) {
+        document.cookie = `googtrans=${googleCode}; path=/;`;
+        document.cookie = `googtrans=${googleCode}; path=/; domain=${hostname}`;
+    }
+};
+
 const Assets = () => {
     const navigate = useNavigate();
-    const { setIsChatOpen, user, loading } = useApp();
+    const { setIsChatOpen, user } = useApp();
 
     const balance = parseFloat(user?.balance || 0);
     const [verificationStatus, setVerificationStatus] = useState('unverified');
@@ -48,6 +60,32 @@ const Assets = () => {
     const [isPromotionOpen, setIsPromotionOpen] = useState(false);
     const [isBindAddressOpen, setIsBindAddressOpen] = useState(false);
     const [showBalance, setShowBalance] = useState(true);
+    const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+
+    const languages = [
+        { code: 'en', name: 'English', flag: '🇺🇸', googleCode: '/en/en' },
+        { code: 'zh', name: '中文 (Chinese)', flag: '🇨🇳', googleCode: '/en/zh-CN' },
+        { code: 'es', name: 'Español (Spanish)', flag: '🇪🇸', googleCode: '/en/es' },
+        { code: 'fr', name: 'Français (French)', flag: '🇫🇷', googleCode: '/en/fr' },
+        { code: 'ar', name: 'العربية (Arabic)', flag: '🇸🇦', googleCode: '/en/ar' }
+    ];
+
+    const [selectedLanguage, setSelectedLanguage] = useState(() => {
+        return localStorage.getItem('aurelian_language') || 'en';
+    });
+
+    const handleLanguageSelect = (code) => {
+        const langInfo = languages.find(l => l.code === code);
+        setSelectedLanguage(code);
+        localStorage.setItem('aurelian_language', code);
+        setIsLanguageOpen(false);
+
+        // Call outer helper function to manage cookies
+        setGoogleTranslateCookie(code, langInfo?.googleCode);
+        
+        // Reload to let Google Translate parse the DOM
+        window.location.reload();
+    };
 
     // Fetch verification status
     useEffect(() => {
@@ -81,19 +119,25 @@ const Assets = () => {
         return () => clearInterval(interval);
     }, []);
 
+    const usdtBalance = parseFloat(user?.balance || user?.points || 0);
+    const btcBalance = parseFloat(user?.btcBalance || 0);
+    const ethBalance = parseFloat(user?.ethBalance || 0);
+    
+    // Calculate total valuation in USD
+    const totalUsdValuation = usdtBalance + (btcBalance * (rates.BTC || 0)) + (ethBalance * (rates.ETH || 0));
+
     const getDisplayBalance = () => {
         if (!showBalance) return '******';
-        const usdBalance = balance;
         switch (currency) {
             case 'BTC':
-                return rates.BTC ? (usdBalance / rates.BTC).toFixed(6) + ' BTC' : '...';
+                return rates.BTC ? (totalUsdValuation / rates.BTC).toFixed(6) + ' BTC' : '...';
             case 'ETH':
-                return rates.ETH ? (usdBalance / rates.ETH).toFixed(4) + ' ETH' : '...';
+                return rates.ETH ? (totalUsdValuation / rates.ETH).toFixed(4) + ' ETH' : '...';
             case 'USDT':
-                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(usdBalance).replace('$', '') + ' USDT';
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalUsdValuation).replace('$', '') + ' USDT';
             case 'USD':
             default:
-                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(usdBalance);
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalUsdValuation);
         }
     };
 
@@ -109,12 +153,12 @@ const Assets = () => {
             <BindAddressModal isOpen={isBindAddressOpen} onClose={() => setIsBindAddressOpen(false)} />
 
             {/* Header */}
-            <div className="pt-8 mb-6 flex justify-between items-center">
+            <div className="pt-6 mb-4 flex justify-between items-center">
                 <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-gold-text tracking-tight">Assets</h1>
             </div>
 
             {/* User Info Header */}
-            <div className="mb-8 flex justify-between items-center px-1">
+            <div className="mb-6 flex justify-between items-center px-1">
                 <div>
                     <div className="text-sm text-gray-500 font-medium mb-1">
                         {user?.email ? (user.email.length > 25 ? user.email.substring(0, 25) + '...' : user.email) : 'Join Aurelian Excellence'}
@@ -142,7 +186,7 @@ const Assets = () => {
             </div>
 
             {/* My Assets Card */}
-            <div className="relative mb-8 group">
+            <div className="relative mb-6 group">
                 {/* Background & Clipping Container */}
                 <div className={`absolute inset-0 rounded-3xl overflow-hidden transition-all duration-300 ${user
                     ? 'bg-gradient-gold shadow-gold-lg'
@@ -155,12 +199,12 @@ const Assets = () => {
                 </div>
 
                 {/* Content Container (Allows Overflow) */}
-                <div className={`relative rounded-3xl p-8 transition-colors duration-300 ${user ? 'text-black' : 'text-gray-900 dark:text-white'}`}>
+                <div className={`relative rounded-3xl transition-colors duration-300 ${user ? 'p-8 text-black' : 'p-6 text-gray-900 dark:text-white'}`}>
                     {user ? (
                         <>
                             <div className="relative z-10">
                                 <div className="flex items-center gap-2 mb-3 opacity-90">
-                                    <span className="text-sm font-semibold tracking-wide uppercase">Total Assets Valuation</span>
+                                    <span className="text-sm font-semibold tracking-tight">Total Assets Valuation</span>
                                     <div onClick={() => setShowBalance(!showBalance)} className="cursor-pointer p-1 hover:bg-black/5 rounded transition-colors">
                                         {showBalance ? <Eye size={18} /> : <EyeOff size={18} />}
                                     </div>
@@ -202,22 +246,48 @@ const Assets = () => {
                                         )}
                                     </div>
                                 </div>
+
+                                {/* Quick Actions Row */}
+                                <div className="flex gap-2 lg:gap-4 mt-8">
+                                    <button
+                                        onClick={() => setIsDepositOpen(true)}
+                                        className="flex-1 bg-black/10 hover:bg-black/20 backdrop-blur-md border border-black/5 py-3 rounded-2xl flex flex-col items-center gap-1 transition-all active:scale-[0.98]"
+                                    >
+                                        <ArrowDownCircle size={20} className="mb-0.5" />
+                                        <span className="text-[10px] font-bold tracking-tight">Deposit</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setIsWithdrawOpen(true)}
+                                        className="flex-1 bg-black/10 hover:bg-black/20 backdrop-blur-md border border-black/5 py-3 rounded-2xl flex flex-col items-center gap-1 transition-all active:scale-[0.98]"
+                                        disabled={balance <= 0}
+                                    >
+                                        <Wallet size={20} className="mb-0.5" />
+                                        <span className="text-[10px] font-bold tracking-tight">Withdraw</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setIsExchangeOpen(true)}
+                                        className="flex-1 bg-black/10 hover:bg-black/20 backdrop-blur-md border border-black/5 py-3 rounded-2xl flex flex-col items-center gap-1 transition-all active:scale-[0.98]"
+                                    >
+                                        <RefreshCcw size={20} className="mb-0.5" />
+                                        <span className="text-[10px] font-bold tracking-tight">Exchange</span>
+                                    </button>
+                                </div>
                             </div>
                         </>
                     ) : (
-                        <div className="text-center py-4 relative z-10">
-                            <div className="text-xl font-bold mb-3">Institutional Portfolio Access</div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto">Log in to access your secure trading environment and portfolio management tools.</p>
-                            <div className="flex gap-4 justify-center max-w-xs mx-auto">
+                        <div className="text-center py-1 relative z-10">
+                            <div className="text-lg font-bold mb-2">Institutional Portfolio Access</div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-5 max-w-sm mx-auto">Log in to access your secure trading environment and portfolio management tools.</p>
+                            <div className="flex gap-3 justify-center max-w-xs mx-auto">
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="flex-1 py-3 px-6 bg-primary hover:bg-primary-dark text-black font-bold rounded-xl transition-colors shadow-lg shadow-primary/20"
+                                    className="flex-1 py-2.5 px-4 bg-primary hover:bg-primary-dark text-black font-bold rounded-xl transition-colors shadow-lg shadow-primary/20 text-sm"
                                 >
                                     Log In
                                 </button>
                                 <button
                                     onClick={() => navigate('/register')}
-                                    className="flex-1 py-3 px-6 bg-transparent border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary/5 transition-colors"
+                                    className="flex-1 py-2.5 px-4 bg-transparent border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary/5 transition-colors text-sm"
                                 >
                                     Register
                                 </button>
@@ -227,9 +297,68 @@ const Assets = () => {
                 </div>
             </div>
 
+            {/* My Wallet / Portfolio */}
+            {user && (
+                <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
+                    <div className="text-xs font-bold text-gray-400 mb-4 ml-2 uppercase tracking-widest">My Wallet</div>
+                    <div className="space-y-3">
+                        {/* USDT */}
+                        <div className="bg-white dark:bg-surface-dark rounded-2xl p-4 flex items-center justify-between shadow-sm border border-gray-100 dark:border-white/5 transition-transform active:scale-[0.98]">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 font-bold text-xl border border-green-500/20">
+                                    ₮
+                                </div>
+                                <div>
+                                    <div className="font-bold text-gray-900 dark:text-white text-lg">USDT</div>
+                                    <div className="text-xs text-gray-400 font-medium">Tether</div>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <div className="font-bold text-gray-900 dark:text-white font-mono text-lg">{showBalance ? usdtBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '******'}</div>
+                                <div className="text-xs text-gray-400 font-mono mt-0.5">{showBalance ? `$${usdtBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '******'}</div>
+                            </div>
+                        </div>
+
+                        {/* BTC */}
+                        <div className="bg-white dark:bg-surface-dark rounded-2xl p-4 flex items-center justify-between shadow-sm border border-gray-100 dark:border-white/5 transition-transform active:scale-[0.98]">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-xl border border-orange-500/20">
+                                    ₿
+                                </div>
+                                <div>
+                                    <div className="font-bold text-gray-900 dark:text-white text-lg">BTC</div>
+                                    <div className="text-xs text-gray-400 font-medium">Bitcoin</div>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <div className="font-bold text-gray-900 dark:text-white font-mono text-lg">{showBalance ? btcBalance : '******'}</div>
+                                <div className="text-xs text-gray-400 font-mono mt-0.5">{showBalance ? `$${(btcBalance * (rates.BTC || 0)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '******'}</div>
+                            </div>
+                        </div>
+
+                        {/* ETH */}
+                        <div className="bg-white dark:bg-surface-dark rounded-2xl p-4 flex items-center justify-between shadow-sm border border-gray-100 dark:border-white/5 transition-transform active:scale-[0.98]">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold text-xl border border-blue-500/20">
+                                    Ξ
+                                </div>
+                                <div>
+                                    <div className="font-bold text-gray-900 dark:text-white text-lg">ETH</div>
+                                    <div className="text-xs text-gray-400 font-medium">Ethereum</div>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <div className="font-bold text-gray-900 dark:text-white font-mono text-lg">{showBalance ? ethBalance : '******'}</div>
+                                <div className="text-xs text-gray-400 font-mono mt-0.5">{showBalance ? `$${(ethBalance * (rates.ETH || 0)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '******'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Portfolio Management */}
             <div className="mb-8">
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 ml-2">Portfolio Management</div>
+                <div className="text-xs font-bold text-gray-400 mb-4 ml-2">Portfolio Management</div>
                 <div className="bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/5 rounded-2xl overflow-hidden shadow-sm">
                     <MenuItem
                         icon={ArrowDownCircle}
@@ -273,8 +402,51 @@ const Assets = () => {
                         icon={Headphones}
                         title="24/7 Priority Concierge"
                         onClick={() => setIsChatOpen(true)}
-                        isLast={true}
                     />
+                    <div
+                        onClick={() => setIsLanguageOpen(!isLanguageOpen)}
+                        className={`p-5 flex justify-between items-center cursor-pointer transition-colors hover:bg-black/5 dark:hover:bg-white/5 border-t border-gray-100 dark:border-white/5`}
+                    >
+                        <div className="flex items-center">
+                            <div className="w-1 h-6 bg-gradient-gold rounded mr-4 shadow-gold-sm"></div>
+                            <div className="mr-3 text-primary-dark dark:text-primary">
+                                <Globe size={22} />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-gray-900 dark:text-white font-medium text-base">Language</span>
+                                <span className="text-xs text-gray-400">
+                                    {languages.find(l => l.code === selectedLanguage)?.flag}{' '}
+                                    {languages.find(l => l.code === selectedLanguage)?.name}
+                                </span>
+                            </div>
+                        </div>
+                        <ChevronRight size={18} className={`text-gray-400 transition-transform duration-200 ${isLanguageOpen ? 'rotate-90' : ''}`} />
+                    </div>
+
+                    {/* Language Dropdown */}
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isLanguageOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                        <div className="bg-gray-50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5">
+                            {languages.map((lang, idx) => (
+                                <div
+                                    key={lang.code}
+                                    onClick={() => handleLanguageSelect(lang.code)}
+                                    className={`flex items-center justify-between px-6 py-3.5 cursor-pointer transition-all duration-200 hover:bg-gray-100 dark:hover:bg-white/5 ${idx !== languages.length - 1 ? 'border-b border-gray-100 dark:border-white/[0.04]' : ''} ${selectedLanguage === lang.code ? 'bg-primary/5 dark:bg-primary/5' : ''}`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl" role="img" aria-label={lang.name}>{lang.flag}</span>
+                                        <span className={`font-medium text-sm ${selectedLanguage === lang.code ? 'text-primary font-bold' : 'text-gray-700 dark:text-gray-300'}`}>
+                                            {lang.name}
+                                        </span>
+                                    </div>
+                                    {selectedLanguage === lang.code && (
+                                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                                            <Check size={12} className="text-black" strokeWidth={3} />
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
 

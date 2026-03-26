@@ -37,8 +37,8 @@ const ModifyPassword = () => {
                     className="cursor-pointer text-primary hover:text-white transition-colors"
                     size={24}
                 />
-                <h1 className="flex-1 text-center text-lg font-extrabold text-primary tracking-wide font-display uppercase">
-                    Modify {type === 'login' ? 'Login' : 'Funding'} Password
+                <h1 className="flex-1 text-center text-lg font-bold text-primary font-display">
+                    Modify {type === 'login' ? 'Login' : 'Funding'} password
                 </h1>
                 <div className="w-6"></div>
             </div>
@@ -54,7 +54,7 @@ const ModifyPassword = () => {
 
                     <div className="space-y-5">
                         <div className="group">
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 group-focus-within:text-primary transition-colors">Old Password</label>
+                            <label className="block text-xs font-bold text-gray-400 mb-2 group-focus-within:text-primary transition-colors">Old password</label>
                             <input
                                 type="password"
                                 value={formData.oldPassword}
@@ -66,7 +66,7 @@ const ModifyPassword = () => {
                         </div>
 
                         <div className="group">
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 group-focus-within:text-primary transition-colors">New Password</label>
+                            <label className="block text-xs font-bold text-gray-400 mb-2 group-focus-within:text-primary transition-colors">New password</label>
                             <input
                                 type="password"
                                 value={formData.newPassword}
@@ -78,7 +78,7 @@ const ModifyPassword = () => {
                         </div>
 
                         <div className="group">
-                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 group-focus-within:text-primary transition-colors">Confirm New Password</label>
+                            <label className="block text-xs font-bold text-gray-400 mb-2 group-focus-within:text-primary transition-colors">Confirm new password</label>
                             <input
                                 type="password"
                                 value={formData.confirmPassword}

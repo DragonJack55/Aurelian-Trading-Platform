@@ -17,37 +17,20 @@ const BottomNav = () => {
   ];
 
   return (
-    <div style={{
-      position: 'fixed',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: 'var(--bg-deep)',
-      display: 'flex',
-      justifyContent: 'space-around',
-      padding: '12px 0 env(safe-area-inset-bottom)',
-      borderTop: '1px solid var(--glass-border)',
-      zIndex: 1000,
-      backdropFilter: 'blur(10px)'
-    }}>
-      {navItems.map((item) => (
-        <div
-          key={item.path}
-          onClick={() => navigate(item.path)}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            cursor: 'pointer',
-            color: isActive(item.path) ? 'var(--primary-gold)' : 'var(--text-secondary)',
-            transition: 'all 0.3s ease',
-            flex: 1
-          }}
-        >
-          <item.icon size={22} style={{ filter: isActive(item.path) ? 'drop-shadow(0 0 5px rgba(212, 175, 55, 0.5))' : 'none' }} />
-          <span style={{ fontSize: '11px', marginTop: '6px', fontWeight: isActive(item.path) ? '700' : '500' }}>{item.label}</span>
-        </div>
-      ))}
+    <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-[#05080F]/95 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 flex justify-around pt-3 pb-[calc(14px+env(safe-area-inset-bottom))] z-[1000] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)] transition-all duration-500">
+      {navItems.map((item) => {
+        const active = isActive(item.path);
+        return (
+          <div
+            key={item.path}
+            onClick={() => navigate(item.path)}
+            className={`flex flex-col items-center cursor-pointer transition-all duration-300 flex-1 ${active ? 'text-primary' : 'text-text-muted hover:text-text-subtle'}`}
+          >
+            <item.icon size={22} className={active ? 'drop-shadow-[0_0_5px_rgba(212,175,55,0.6)]' : ''} />
+            <span className={`text-[11px] mt-1.5 ${active ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
+          </div>
+        );
+      })}
     </div>
   );
 };

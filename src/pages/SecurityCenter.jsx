@@ -24,7 +24,7 @@ const SecurityCenter = () => {
 
     useEffect(() => {
         fetchStatus();
-    }, [user?.email]);
+    }, [user?.email, fetchStatus]);
 
     const handleVerifyClick = () => {
         if (!user) {
@@ -77,14 +77,14 @@ const SecurityCenter = () => {
             {/* Header */}
             <div className="sticky top-0 z-50 bg-background-base/80 backdrop-blur-md border-b border-white/5 px-5 py-4 flex items-center">
                 <ChevronLeft onClick={() => navigate('/assets')} className="cursor-pointer text-primary" size={24} />
-                <h1 className="flex-1 text-center text-lg font-extrabold text-primary tracking-wide font-display">SECURITY CENTER</h1>
+                <h1 className="flex-1 text-center text-lg font-bold text-primary font-display">Security Center</h1>
                 <div className="w-6"></div>
             </div>
 
             <div className="p-5 max-w-lg mx-auto">
                 {/* Identity Verification Section */}
                 <div className="mb-8">
-                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-3 pl-1">Identity</div>
+                    <div className="text-[10px] text-gray-400 font-bold mb-3 pl-1">Identity</div>
                     <div
                         onClick={handleVerifyClick}
                         className="bg-surface-dark border border-white/5 rounded-2xl p-5 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-all active:scale-[0.98]"
@@ -103,7 +103,7 @@ const SecurityCenter = () => {
                     {/* Rejection Reason Display */}
                     {verificationStatus === 'rejected' && rejectionReason && (
                         <div className="mt-3 bg-red-500/5 border border-red-500/10 rounded-xl p-4 animate-fade-in">
-                            <div className="text-[10px] uppercase font-bold text-red-500 mb-1">Rejection Reason</div>
+                            <div className="text-[10px] font-bold text-red-500 mb-1">Rejection reason</div>
                             <div className="text-xs text-red-200 leading-relaxed font-medium">
                                 {rejectionReason}
                             </div>
@@ -116,7 +116,7 @@ const SecurityCenter = () => {
 
                 {/* Password Management */}
                 <div className="mb-8">
-                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-3 pl-1">Account Security</div>
+                    <div className="text-[10px] text-gray-400 font-bold mb-3 pl-1">Account security</div>
                     <div className="bg-surface-dark border border-white/5 rounded-2xl overflow-hidden divide-y divide-white/5">
                         {menuItems.map((item, index) => (
                             <div
@@ -138,7 +138,7 @@ const SecurityCenter = () => {
                 <div className="mt-8 p-6 rounded-2xl bg-primary/5 border border-primary/20">
                     <div className="flex gap-3 items-center mb-3">
                         <Shield size={20} className="text-primary" />
-                        <span className="text-sm font-extrabold text-primary uppercase tracking-wide">Security Tip</span>
+                        <span className="text-sm font-bold text-primary">Security tip</span>
                     </div>
                     <p className="text-xs text-secondary leading-relaxed">
                         For your account safety, please do not share your funding password or recovery keys with anyone, including Aurelian support staff.

@@ -100,7 +100,7 @@ export const updateUserStatus = async (email, status) => {
     }
 };
 
-export const updateUserPoints = async (email, newPoints) => {
+export const updateUserPoints = async (email, newPoints, currency = 'USDT') => {
     try {
         const usersRef = collection(db, "users");
         const q = query(usersRef, where("email", "==", email));
@@ -109,7 +109,11 @@ export const updateUserPoints = async (email, newPoints) => {
         if (snapshot.empty) throw new Error('User not found');
         const userDoc = snapshot.docs[0];
 
-        await updateDoc(doc(db, "users", userDoc.id), { balance: newPoints });
+        let field = 'balance';
+        if (currency === 'BTC') field = 'btcBalance';
+        if (currency === 'ETH') field = 'ethBalance';
+
+        await updateDoc(doc(db, "users", userDoc.id), { [field]: newPoints });
         return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
@@ -120,7 +124,7 @@ export const updateUserFreezeStatus = async (email, isFrozen) => {
     return updateUserStatus(email, isFrozen ? 'frozen' : 'active');
 };
 
-export const incrementUserPoints = async (email, amount) => {
+export const incrementUserPoints = async (email, amount, currency = 'USDT') => {
     try {
         let userDocId = null;
 
@@ -135,8 +139,12 @@ export const incrementUserPoints = async (email, amount) => {
             userDocId = snapshot.docs[0].id;
         }
 
+        let field = 'balance';
+        if (currency === 'BTC') field = 'btcBalance';
+        if (currency === 'ETH') field = 'ethBalance';
+
         await updateDoc(doc(db, "users", userDocId), {
-            balance: increment(amount)
+            [field]: increment(amount)
         });
         return { success: true };
     } catch (error) {

@@ -4,6 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 
 import Navbar from '../components/Navbar';
 import BottomNav from '../components/BottomNav';
+import BottomTicker from '../components/BottomTicker';
 
 const MainLayout = () => {
     const { theme, toggleTheme } = useTheme();
@@ -13,14 +14,18 @@ const MainLayout = () => {
     return (
         <div className="min-h-screen bg-background-main text-text-main font-sans transition-colors duration-300 selection:bg-primary/30 selection:text-black dark:selection:text-white">
 
-            {/* Fixed Top Elements */}
-            <Navbar isDarkMode={theme === 'dark'} toggleTheme={toggleTheme} />
+            {/* Fixed Top Elements - Only show on Home for mobile, always on desktop */}
+            <div className={`${isHomePage ? '' : 'hidden lg:block'}`}>
+                <Navbar isDarkMode={theme === 'dark'} toggleTheme={toggleTheme} />
+            </div>
 
             {/* Main Content Area */}
-            {/* Padding Top logic: Home page needs full bleed (pt-0), others need to account for Fixed Header */}
-            <main className={`${isHomePage ? 'pt-0' : 'pt-20 lg:pt-24'} pb-16 lg:pb-0 min-h-screen w-full`}>
+            <main className={`${isHomePage ? 'pt-0' : 'pt-4 lg:pt-24'} pb-24 lg:pb-0 min-h-screen w-full`}>
                 <Outlet />
             </main>
+
+            {/* Global Bottom Ticker - Visible on all pages */}
+            <BottomTicker />
 
             {/* Bottom Navigation for Mobile */}
             <div className="lg:hidden">

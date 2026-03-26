@@ -52,27 +52,27 @@ const Navbar = ({ isDarkMode, toggleTheme }) => {
     };
 
     return (
-        <nav className={`fixed top-0 w-full z-[100] transition-all duration-300 ${isDarkMode ? 'bg-background-dark/80 backdrop-blur-md border-b border-border-gold' : 'bg-white/95 backdrop-blur-md border-b border-border-light shadow-sm'}`}>
+        <nav className={`fixed top-0 w-full z-[100] transition-all duration-300 pt-[env(safe-area-inset-top)] ${isDarkMode ? 'bg-background-dark/80 backdrop-blur-md border-b border-border-gold' : 'bg-white/95 backdrop-blur-md border-b border-border-light shadow-sm'}`}>
             {/* Dark Mode Top Line Effect */}
-            <div className="hidden dark:block absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-60"></div>
+            <div className="hidden dark:block absolute top-[env(safe-area-inset-top)] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-60"></div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16 dark:h-20 transition-all duration-300">
                     {/* Logo Area */}
-                    <Link to="/" className="flex-shrink-0 flex items-center gap-3 dark:gap-4 cursor-pointer group relative">
+                    <Link to="/" className="flex-shrink-0 flex items-center gap-2 sm:gap-3 dark:gap-4 cursor-pointer group relative">
                         <div className="hidden dark:block absolute -inset-2 bg-primary/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        <div className="relative w-10 h-10 dark:w-12 dark:h-12 flex items-center justify-center transition-all duration-300">
+                        <div className="relative w-8 h-8 sm:w-10 sm:h-10 dark:w-12 dark:h-12 flex items-center justify-center transition-all duration-300 shrink-0">
                             <div className="absolute inset-0 bg-gradient-gold rounded-lg dark:rounded-xl rotate-45 group-hover:rotate-90 dark:group-hover:rotate-[135deg] transition-transform duration-500 dark:duration-700 opacity-80 dark:opacity-90 blur-[2px] dark:blur-none dark:shadow-gold-sm"></div>
                             <div className="relative w-full h-full dark:w-[96%] dark:h-[96%] bg-white dark:bg-[#080b13] border border-primary/50 dark:border-none rounded-lg dark:rounded-[10px] flex items-center justify-center z-10 shadow-sm">
-                                <span className="material-symbols-outlined text-primary-dark text-2xl dark:text-3xl dark:text-transparent dark:bg-clip-text dark:bg-gradient-gold-text dark:drop-shadow-sm transition-all">diamond</span>
+                                <span className="material-symbols-outlined text-primary-dark text-xl sm:text-2xl dark:text-3xl dark:text-transparent dark:bg-clip-text dark:bg-gradient-gold-text dark:drop-shadow-sm transition-all">diamond</span>
                             </div>
                         </div>
-                        <div className="flex flex-col relative z-10">
-                            <span className="font-display font-bold text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-primary-dark via-primary to-primary-dark min-[0px]:dark:bg-gradient-gold-text uppercase leading-none group-hover:text-primary-dark transition-colors drop-shadow-sm dark:tracking-widest">Aurelian</span>
-                            <div className="flex items-center gap-0.5 dark:gap-2">
-                                <span className="hidden dark:block h-[1px] w-3 bg-gradient-gold opacity-50"></span>
-                                <span className="font-sans text-[0.6rem] dark:text-[0.65rem] text-primary-dark dark:text-primary tracking-[0.3em] uppercase pl-0.5 dark:pl-0 font-bold dark:font-medium dark:opacity-90">TD Trade</span>
-                                <span className="ml-2 px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-mono">{appVersion}</span>
+                        <div className="flex flex-col relative z-10 shrink-0">
+                            <span className="font-display font-bold text-lg sm:text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-primary-dark via-primary to-primary-dark min-[0px]:dark:bg-gradient-gold-text uppercase leading-none group-hover:text-primary-dark transition-colors drop-shadow-sm dark:tracking-widest">Aurelian</span>
+                            <div className="flex items-center gap-0.5 dark:gap-2 mt-0.5 sm:mt-0">
+                                <span className="hidden dark:block h-[1px] w-2 sm:w-3 bg-gradient-gold opacity-50"></span>
+                                <span className="font-sans text-[0.5rem] sm:text-[0.6rem] dark:text-[0.65rem] text-primary-dark dark:text-primary tracking-[0.15em] sm:tracking-[0.3em] uppercase pl-0.5 dark:pl-0 font-bold dark:font-medium dark:opacity-90">TD Trade</span>
+                                <span className="hidden md:inline-block ml-1 sm:ml-2 px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[8px] sm:text-[10px] font-mono leading-none">{appVersion}</span>
                             </div>
                         </div>
                     </Link>
@@ -95,13 +95,13 @@ const Navbar = ({ isDarkMode, toggleTheme }) => {
                     </div>
 
                     {/* Right Actions */}
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-3 sm:space-x-6 shrink-0">
                         <button
                             onClick={toggleTheme}
-                            className="p-2 rounded-lg text-text-muted hover:text-primary transition-colors focus:outline-none"
+                            className="hidden md:block p-1 sm:p-2 rounded-lg text-text-muted hover:text-primary transition-colors focus:outline-none"
                             title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
                         >
-                            <span className="material-symbols-outlined text-xl">
+                            <span className="material-symbols-outlined text-lg sm:text-xl">
                                 {isDarkMode ? 'light_mode' : 'dark_mode'}
                             </span>
                         </button>
@@ -154,11 +154,12 @@ const Navbar = ({ isDarkMode, toggleTheme }) => {
 
                                 <button
                                     onClick={() => navigate('/register')}
-                                    className="btn-gold shadow-glow"
+                                    className="btn-gold shadow-glow px-3 py-1.5 sm:px-6 sm:py-3"
                                 >
-                                    <span className="relative z-10 flex items-center gap-2">
-                                        Join Now
-                                        <span className="material-symbols-outlined text-sm font-bold group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                    <span className="relative z-10 flex items-center gap-1 sm:gap-2 whitespace-nowrap text-[10px] sm:text-sm">
+                                        <span className="sm:hidden">Join</span>
+                                        <span className="hidden sm:inline">Join Now</span>
+                                        <span className="material-symbols-outlined text-[10px] sm:text-sm font-bold group-hover:translate-x-1 transition-transform">arrow_forward</span>
                                     </span>
                                 </button>
                             </>
@@ -188,6 +189,14 @@ const Navbar = ({ isDarkMode, toggleTheme }) => {
                             <span className="font-semibold">{item.name}</span>
                         </Link>
                     ))}
+                    <div className="h-px bg-white/10 my-2"></div>
+                    <button
+                        onClick={() => { toggleTheme(); setIsMobileMenuOpen(false); }}
+                        className="flex items-center gap-3 p-3 rounded-lg text-gray-400 hover:text-white transition-colors text-left"
+                    >
+                        <span className="material-symbols-outlined">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+                        <span className="font-semibold">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                    </button>
                 </div>
             )}
         </nav>

@@ -97,3 +97,6 @@ deploy_ftp.js
 .vercel
 .env*.local
 stitch_*.json
+
+# Cursor IDE specific
+.cursor/

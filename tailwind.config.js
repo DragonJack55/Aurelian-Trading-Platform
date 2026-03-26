@@ -66,6 +66,10 @@ export default {
                 'spin-slower': 'spin 30s linear infinite',
                 'spin-reverse-slow': 'spinReverse 20s linear infinite',
                 'spin-reverse-slower': 'spinReverse 30s linear infinite',
+                'orbit-bitcoin': 'orbitBitcoin 14s linear infinite',
+                'orbit-euro': 'orbitEuro 12s linear infinite',
+                'orbit-yen': 'orbitYen 18s linear infinite',
+                'orbit-goldbar': 'orbitGoldbar 16s linear infinite',
             },
             keyframes: {
                 spinReverse: {
@@ -95,7 +99,50 @@ export default {
                 slideUp: {
                     '0%': { transform: 'translateY(20px)', opacity: '0' },
                     '100%': { transform: 'translateY(0)', opacity: '1' },
-                }
+                },
+                /* Orbital keyframes: elliptical paths around the phone center.
+                   0% = start position, traces ellipse, goes behind phone (scale down + z changes).
+                   The phone sits at z-20, assets toggle between z-10 (behind) and z-30 (in front). */
+                orbitBitcoin: {
+                    '0%':   { transform: 'translate(-220px, -20px) scale(1)', zIndex: '30', opacity: '1' },
+                    '15%':  { transform: 'translate(-160px, -120px) scale(0.9)', zIndex: '30', opacity: '1' },
+                    '30%':  { transform: 'translate(0px, -140px) scale(0.7)', zIndex: '10', opacity: '0.5' },
+                    '45%':  { transform: 'translate(160px, -100px) scale(0.6)', zIndex: '10', opacity: '0.4' },
+                    '55%':  { transform: 'translate(200px, 0px) scale(0.65)', zIndex: '10', opacity: '0.45' },
+                    '70%':  { transform: 'translate(140px, 100px) scale(0.8)', zIndex: '30', opacity: '0.8' },
+                    '85%':  { transform: 'translate(-80px, 80px) scale(0.95)', zIndex: '30', opacity: '1' },
+                    '100%': { transform: 'translate(-220px, -20px) scale(1)', zIndex: '30', opacity: '1' },
+                },
+                orbitEuro: {
+                    '0%':   { transform: 'translate(180px, -100px) scale(1)', zIndex: '30', opacity: '1' },
+                    '15%':  { transform: 'translate(100px, -160px) scale(0.85)', zIndex: '30', opacity: '0.9' },
+                    '30%':  { transform: 'translate(-60px, -130px) scale(0.65)', zIndex: '10', opacity: '0.4' },
+                    '45%':  { transform: 'translate(-180px, -40px) scale(0.6)', zIndex: '10', opacity: '0.35' },
+                    '55%':  { transform: 'translate(-170px, 60px) scale(0.65)', zIndex: '10', opacity: '0.4' },
+                    '70%':  { transform: 'translate(-60px, 120px) scale(0.8)', zIndex: '30', opacity: '0.8' },
+                    '85%':  { transform: 'translate(120px, 60px) scale(0.95)', zIndex: '30', opacity: '1' },
+                    '100%': { transform: 'translate(180px, -100px) scale(1)', zIndex: '30', opacity: '1' },
+                },
+                orbitYen: {
+                    '0%':   { transform: 'translate(160px, 60px) scale(1)', zIndex: '30', opacity: '0.9' },
+                    '15%':  { transform: 'translate(200px, -60px) scale(0.9)', zIndex: '30', opacity: '0.85' },
+                    '30%':  { transform: 'translate(100px, -150px) scale(0.7)', zIndex: '10', opacity: '0.4' },
+                    '45%':  { transform: 'translate(-80px, -130px) scale(0.55)', zIndex: '10', opacity: '0.3' },
+                    '55%':  { transform: 'translate(-200px, -30px) scale(0.6)', zIndex: '10', opacity: '0.35' },
+                    '70%':  { transform: 'translate(-150px, 90px) scale(0.75)', zIndex: '30', opacity: '0.7' },
+                    '85%':  { transform: 'translate(-20px, 130px) scale(0.9)', zIndex: '30', opacity: '0.9' },
+                    '100%': { transform: 'translate(160px, 60px) scale(1)', zIndex: '30', opacity: '0.9' },
+                },
+                orbitGoldbar: {
+                    '0%':   { transform: 'translate(140px, 120px) rotate(12deg) scale(1)', zIndex: '30', opacity: '1' },
+                    '15%':  { transform: 'translate(220px, 20px) rotate(8deg) scale(0.9)', zIndex: '30', opacity: '0.9' },
+                    '30%':  { transform: 'translate(140px, -110px) rotate(5deg) scale(0.7)', zIndex: '10', opacity: '0.4' },
+                    '45%':  { transform: 'translate(-40px, -140px) rotate(0deg) scale(0.55)', zIndex: '10', opacity: '0.3' },
+                    '55%':  { transform: 'translate(-180px, -60px) rotate(-3deg) scale(0.6)', zIndex: '10', opacity: '0.35' },
+                    '70%':  { transform: 'translate(-160px, 70px) rotate(0deg) scale(0.75)', zIndex: '30', opacity: '0.7' },
+                    '85%':  { transform: 'translate(-40px, 140px) rotate(8deg) scale(0.9)', zIndex: '30', opacity: '0.95' },
+                    '100%': { transform: 'translate(140px, 120px) rotate(12deg) scale(1)', zIndex: '30', opacity: '1' },
+                },
             }
         },
     },

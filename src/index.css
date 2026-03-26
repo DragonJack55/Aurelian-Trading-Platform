@@ -1,9 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    --font-display: 'Outfit', 'Inter', sans-serif;
+
     /* Light Mode (Default) */
     --color-primary: #D4AF37;
     --color-primary-light: #FFD700;
@@ -102,11 +107,11 @@
   }
 
   .btn-gold {
-    @apply bg-gradient-gold text-black font-display font-bold uppercase tracking-wider hover:shadow-glow hover:brightness-110 transition-all duration-300 active:scale-95 px-6 py-3 rounded-2xl;
+    @apply bg-gradient-gold text-black font-display font-bold tracking-tight hover:shadow-glow hover:brightness-110 transition-all duration-300 active:scale-95 px-6 py-3 rounded-2xl;
   }
 
   .nav-link {
-    @apply text-text-muted hover:text-text-main transition-all duration-300 font-bold text-sm tracking-wide uppercase font-display relative;
+    @apply text-text-muted hover:text-text-main transition-all duration-300 font-bold text-sm tracking-tight font-display relative;
   }
 
   .nav-link::after {
@@ -127,6 +132,7 @@
 /* Base Styles */
 body {
   @apply bg-background-dark text-text-subtle font-sans antialiased selection:bg-primary selection:text-black overflow-x-hidden min-h-screen bg-gradient-dark bg-fixed;
+  font-family: var(--font-sans);
 }
 
 /* Custom Scrollbar */
@@ -154,4 +160,37 @@ body {
   to {
     background-position: 200% center;
   }
+}
+
+@keyframes border-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Candle Racing Border Utility */
+.btn-racing-wrapper {
+  @apply relative p-[2px] rounded-[1.2rem] overflow-hidden flex items-center justify-center;
+  background: rgba(255, 255, 255, 0.05);
+  isolation: isolate;
+}
+
+.candle-racing-border {
+  content: '';
+  @apply absolute z-0;
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    #00D26A 40deg, /* Green candle - widened */
+    transparent 80deg,
+    transparent 180deg,
+    #F92C2C 220deg, /* Red candle - widened */
+    transparent 260deg,
+    transparent 360deg
+  );
+  filter: blur(2px);
+  animation: border-rotate 4s linear infinite;
 }

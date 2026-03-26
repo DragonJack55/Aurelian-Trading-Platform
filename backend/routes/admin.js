@@ -144,23 +144,32 @@ router.patch('/users/:email/trade-result', async (req, res) => {
     }
 });
 
-// Add/Remove user points
+// Add/Remove user points/crypto
 router.patch('/users/:email/points', async (req, res) => {
     try {
         const { email } = req.params;
-        const { amount } = req.body; // Positive to add, negative to remove
+        const { amount, currency = 'USDT' } = req.body; // Positive to add, negative to remove
 
-        await db.query('UPDATE users SET points = points + ? WHERE email = ?', [amount, email]);
+        let column = 'points';
+        if (currency === 'BTC') column = 'btc_balance';
+        if (currency === 'ETH') column = 'eth_balance';
 
-        const [users] = await db.query('SELECT points FROM users WHERE email = ?', [email]);
+        await db.query(`UPDATE users SET ${column} = ${column} + ? WHERE email = ?`, [amount, email]);
+
+        const [users] = await db.query(`SELECT points, btc_balance, eth_balance FROM users WHERE email = ?`, [email]);
 
         res.json({
             success: true,
-            newBalance: parseFloat(users[0].points)
+            newBalance: parseFloat(users[0][column]),
+            balances: {
+                USDT: parseFloat(users[0].points),
+                BTC: parseFloat(users[0].btc_balance),
+                ETH: parseFloat(users[0].eth_balance)
+            }
         });
     } catch (error) {
         console.error('Update points error:', error);
-        res.status(500).json({ success: false, error: 'Failed to update points' });
+        res.status(500).json({ success: false, error: 'Failed to update user wallet' });
     }
 });
 
@@ -382,6 +391,55 @@ router.post('/messages/:email', async (req, res) => {
     } catch (error) {
         console.error('Send admin message error:', error);
         res.status(500).json({ success: false, error: 'Failed to send message' });
+    }
+});
+
+// AI Professional Rewrite
+router.post('/rewrite', async (req, res) => {
+    try {
+        const { message } = req.body;
+
+        if (!message || !message.trim()) {
+            return res.status(400).json({ success: false, error: 'Message is required' });
+        }
+
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            return res.status(500).json({ success: false, error: 'AI service not configured' });
+        }
+
+        const prompt = `You are an expert customer support agent for Aurelian TD Trade, a premium institutional crypto trading platform. Rewrite the following draft message into a concise, professional, and empathetic customer service reply. Keep the same core intent but elevate the language to match a premium brand. Return ONLY the rewritten message text, with no preamble, quotes, or explanation.
+
+Draft message: "${message.trim()}"`;
+
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.4, maxOutputTokens: 512 }
+                })
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Gemini API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const rewritten = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+        if (!rewritten) {
+            throw new Error('No content from AI');
+        }
+
+        res.json({ success: true, rewritten });
+    } catch (error) {
+        console.error('[AI Rewrite] Error:', error);
+        // Graceful fallback: return the original message unchanged
+        res.status(200).json({ success: true, rewritten: req.body.message, fallback: true });
     }
 });
 

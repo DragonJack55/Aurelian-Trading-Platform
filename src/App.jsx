@@ -21,6 +21,10 @@ import Register from './components/auth/Register';
 import EmailDiagnostic from './components/EmailDiagnostic';
 import ResetCache from './components/ResetCache';
 
+import HelpCenter from './pages/Support/HelpCenter';
+import Compliance from './pages/Support/Compliance';
+import SubmitRequest from './pages/Support/SubmitRequest';
+
 function App() {
   console.log('[App] Mounting Full App with BrowserRouter...');
   console.log('[App] Mounting Full App with BrowserRouter...');
@@ -145,6 +149,12 @@ function AppContent() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/security" element={<SecurityCenter />} />
           <Route path="/security/password/:type" element={<ModifyPassword />} />
+          
+          {/* Support Routes */}
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/compliance" element={<Compliance />} />
+          <Route path="/submit-request" element={<SubmitRequest />} />
+
           {/* Backward compatibility */}
           <Route path="/quotes" element={<Quotes />} />
           <Route path="/trading" element={<Trading />} />

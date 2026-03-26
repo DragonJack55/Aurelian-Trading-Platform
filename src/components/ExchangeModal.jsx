@@ -48,21 +48,56 @@ const ExchangeModal = ({ isOpen, onClose }) => {
 
     const result = amount ? (parseFloat(amount) * getConversionRate(fromCurrency, toCurrency)).toFixed(6) : 0;
 
-    const handleSubmit = (e) => {
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        if (fromCurrency === toCurrency) {
+            setError('Cannot exchange the same currency.');
+            return;
+        }
+
         setIsSubmitting(true);
+        setSuccess('');
+        setError('');
 
-        // Simulate processing
-        setTimeout(() => {
-            setSuccess(`Successfully exchanged ${amount} ${fromCurrency} to ${result} ${toCurrency}`);
-            setAmount('');
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+            
+            const response = await fetch(`${apiUrl}/users/exchange`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    fromCurrency,
+                    toCurrency,
+                    amount: amount
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setSuccess(`Successfully exchanged ${amount} ${fromCurrency} to ${parseFloat(data.convertedAmount).toFixed(6)} ${toCurrency}`);
+                setAmount('');
+                setTimeout(() => {
+                    setSuccess('');
+                    onClose();
+                    window.location.reload(); 
+                }, 2000);
+            } else {
+                setError(data.error || 'Exchange failed.');
+            }
+        } catch (err) {
+            console.error('Exchange error:', err);
+            setError('An error occurred during exchange.');
+        } finally {
             setIsSubmitting(false);
-
-            setTimeout(() => {
-                setSuccess('');
-                onClose();
-            }, 2000);
-        }, 1500);
+        }
     };
 
     if (!isOpen) return null;
@@ -143,6 +178,12 @@ const ExchangeModal = ({ isOpen, onClose }) => {
                     {success && (
                         <div className="flex items-center justify-center p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-500 text-xs font-bold text-center">
                             {success}
+                        </div>
+                    )}
+                    
+                    {error && (
+                        <div className="flex items-center justify-center p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold text-center">
+                            {error}
                         </div>
                     )}
 

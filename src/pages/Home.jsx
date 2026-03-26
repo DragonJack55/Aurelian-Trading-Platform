@@ -10,6 +10,63 @@ const Home = () => {
     const [activeTab, setActiveTab] = useState('crypto');
     const [marketAssets, setMarketAssets] = useState(assets);
 
+    // Sequential Typewriter animation
+    const content = {
+        title1: 'Experience Premium',
+        title2: 'Institutional Trading',
+        desc: "Access deep liquidity, superior execution, and bank-grade security on the world's most sophisticated crypto trading platform."
+    };
+
+    const [typed, setTyped] = useState({ t1: '', t2: '', d: '' });
+    const [activeCursor, setActiveCursor] = useState('t1'); // 't1', 't2', 'd', or null
+
+    useEffect(() => {
+        let isCancelled = false;
+
+        const runSequence = async () => {
+            if (isCancelled) return;
+
+            // Reset
+            setTyped({ t1: '', t2: '', d: '' });
+            setActiveCursor('t1');
+
+            // Type T1
+            for (let i = 0; i <= content.title1.length; i++) {
+                if (isCancelled) return;
+                setTyped(prev => ({ ...prev, t1: content.title1.slice(0, i) }));
+                await new Promise(r => setTimeout(r, 40));
+            }
+            setActiveCursor('t2');
+
+            // Type T2
+            for (let i = 0; i <= content.title2.length; i++) {
+                if (isCancelled) return;
+                setTyped(prev => ({ ...prev, t2: content.title2.slice(0, i) }));
+                await new Promise(r => setTimeout(r, 60));
+            }
+            setActiveCursor('d');
+
+            // Type Desc
+            for (let i = 0; i <= content.desc.length; i++) {
+                if (isCancelled) return;
+                setTyped(prev => ({ ...prev, d: content.desc.slice(0, i) }));
+                await new Promise(r => setTimeout(r, 15));
+            }
+            
+            // Blink cursor for 2 seconds then hide
+            await new Promise(r => setTimeout(r, 2000));
+            if (!isCancelled) setActiveCursor(null);
+        };
+
+        runSequence();
+        const mainInterval = setInterval(runSequence, 10000); // Repeat every 10 seconds
+
+        return () => {
+            isCancelled = true;
+            clearInterval(mainInterval);
+        };
+    }, [content.desc, content.title1, content.title2]);
+
     // Fetch initial accurate prices from Binance REST API
     useEffect(() => {
         const fetchInitialPrices = async () => {
@@ -34,7 +91,7 @@ const Home = () => {
                     }
                     return asset;
                 }));
-            } catch (e) {
+            } catch {
                 // Silently fail - WebSocket will update prices
             }
         };
@@ -86,7 +143,7 @@ const Home = () => {
         <div className="w-full flex flex-col font-sans antialiased bg-gray-50 dark:bg-background-dark text-gray-700 dark:text-gray-300 pb-20 lg:pb-0 transition-colors duration-500">
 
             {/* Hero Section */}
-            <div className="relative pt-32 pb-20 min-h-screen flex flex-col justify-center overflow-hidden">
+            <div className="relative pt-12 lg:pt-32 pb-8 lg:pb-20 min-h-[85vh] lg:min-h-screen flex flex-col justify-center overflow-hidden">
                 {/* Background Elements */}
                 <div className="absolute inset-0 z-0 pointer-events-none">
                     <div className="absolute inset-0 bg-gray-50 dark:bg-background-dark"></div>
@@ -100,34 +157,48 @@ const Home = () => {
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16 fade-up visible">
                         {/* Left Column: Original Text Content */}
-                        <div className="text-left">
-                            <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#D4AF37]/30 dark:border-border-gold bg-white dark:bg-surface-dark/50 backdrop-blur-md text-[#B8860B] dark:text-primary text-[10px] font-bold tracking-[0.2em] uppercase mb-8 shadow-sm dark:shadow-glow-strong">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] dark:bg-primary mr-3 animate-pulse"></span>
-                                Institutional Grade Platform
+                        <div className="relative z-10 text-left mt-0 lg:mt-0 min-h-[220px] sm:min-h-[320px] lg:min-h-[480px]">
+                            <div className="flex justify-center lg:justify-start w-full mb-4 lg:mb-8">
+                                <div className="inline-flex items-center px-2.5 py-0.5 sm:px-4 sm:py-1.5 rounded-full border border-[#D4AF37]/30 dark:border-primary/20 bg-[#D4AF37]/5 dark:bg-primary/10 backdrop-blur-md text-[#B8860B] dark:text-primary text-[7px] sm:text-[9px] font-bold tracking-tight shadow-sm dark:shadow-glow">
+                                    <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-[#D4AF37] dark:bg-primary mr-1.5 sm:mr-2 animate-pulse"></span>
+                                    Institutional Grade Platform
+                                </div>
                             </div>
-                            <h1 className="text-4xl md:text-7xl lg:text-8xl font-display font-bold text-gray-900 dark:text-white mb-6 leading-[0.95] tracking-tight">
-                                Experience premium <br />
-                                <span className="text-[#D4AF37] drop-shadow-sm dark:drop-shadow-2xl">institutional trading</span>
+                            <h1 className="text-[2rem] leading-tight sm:text-5xl lg:text-7xl xl:text-8xl font-display font-bold text-gray-900 dark:text-white mb-3 lg:mb-6 lg:leading-[0.95] tracking-tight">
+                                {typed.t1}
+                                {activeCursor === 't1' && <span className="inline-block w-[2px] lg:w-[4px] h-[1.8rem] sm:h-[2.8rem] lg:h-[4rem] bg-gray-900 dark:bg-white ml-1 animate-pulse align-middle rounded-sm"></span>}
+                                <br />
+                                <span className="text-[#D4AF37] drop-shadow-sm dark:drop-shadow-2xl">
+                                    {typed.t2}
+                                    {activeCursor === 't2' && <span className="inline-block w-[2px] lg:w-[4px] h-[1.8rem] sm:h-[2.8rem] lg:h-[4rem] bg-[#D4AF37] ml-1 animate-pulse align-middle rounded-sm"></span>}
+                                </span>
                             </h1>
-                            <p className="text-gray-500 dark:text-text-muted max-w-2xl text-lg mb-10 font-light leading-relaxed mx-0">
-                                Access deep liquidity, superior execution, and bank-grade security on the world's most sophisticated crypto trading platform.
-                            </p>
+                            <div className="relative mb-6 lg:mb-10">
+                                <p className="text-gray-500 dark:text-text-muted max-w-2xl text-sm lg:text-lg font-light leading-relaxed mx-0 min-h-[3em]">
+                                    {typed.d}
+                                    {activeCursor === 'd' && <span className="inline-block w-[2px] lg:w-[3px] h-[1rem] lg:h-[1.4rem] bg-primary ml-1 animate-pulse align-middle rounded-sm"></span>}
+                                </p>
+                            </div>
 
-                            <div className="flex flex-col sm:flex-row items-start justify-start gap-6">
-                                <button onClick={() => navigate('/register')} className="btn-gold px-8 sm:px-10 py-4 text-lg sm:text-xl shadow-glow-strong">
-                                    <span className="relative flex items-center justify-center gap-3">
-                                        START TRADING
-                                        <span className="material-symbols-outlined transition-transform">trending_up</span>
-                                    </span>
-                                </button>
-                                <button onClick={() => navigate('/market')} className="px-10 py-4 rounded-lg border border-border-subtle hover:border-primary/50 hover:bg-black/5 dark:hover:bg-white/5 text-gray-900 dark:text-white font-display font-bold tracking-wider transition-all duration-300">
+                            {/* Desktop-only buttons */}
+                            <div className="hidden lg:flex flex-col sm:flex-row items-start justify-start gap-3 lg:gap-6">
+                                <div className="btn-racing-wrapper group w-full sm:w-auto">
+                                    <div className="candle-racing-border"></div>
+                                    <button onClick={() => navigate('/register')} className="btn-gold relative z-10 px-6 sm:px-10 py-3 sm:py-4 text-sm sm:text-xl shadow-glow-strong w-full sm:w-auto">
+                                        <span className="relative flex items-center justify-center gap-3">
+                                            START TRADING
+                                            <span className="material-symbols-outlined transition-transform">trending_up</span>
+                                        </span>
+                                    </button>
+                                </div>
+                                <button onClick={() => navigate('/market')} className="px-6 sm:px-10 py-3 sm:py-4 rounded-lg border border-border-subtle hover:border-primary/50 hover:bg-black/5 dark:hover:bg-white/5 text-gray-900 dark:text-white font-display font-bold text-sm sm:text-base tracking-wider transition-all duration-300 w-full sm:w-auto">
                                     VIEW MARKETS
                                 </button>
                             </div>
                         </div>
 
                         {/* Right Column: 3D Visualization Asset */}
-                        <div className="relative h-[450px] sm:h-[600px] lg:h-[750px] flex items-center justify-center translate-x-4 sm:translate-x-0 lg:translate-x-6">
+                        <div className="relative z-0 h-[380px] sm:h-[600px] lg:h-[750px] flex items-center justify-center translate-x-4 sm:translate-x-0 lg:translate-x-6 -mt-48 sm:-mt-64 lg:mt-0 opacity-50 lg:opacity-100">
 
                             {/* Background Radial Glow - subtle institutional look */}
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[140px] pointer-events-none"></div>
@@ -151,90 +222,133 @@ const Home = () => {
                                 </svg>
                             </div>
 
-                            {/* Smartphone Mockup */}
-                            <div className="relative w-[220px] sm:w-[280px] lg:w-[310px] h-[450px] sm:h-[580px] lg:h-[630px] z-20 transition-transform duration-1000 transform hover:scale-[1.02]">
-                                <div className="absolute inset-0 rounded-[3.2rem] border-[8px] border-[#0A0D14] bg-[#02050A] shadow-[0_80px_160px_-40px_rgba(0,0,0,0.7),inset_0_0_15px_rgba(255,255,255,0.05)] overflow-hidden">
-                                    <div className="absolute inset-0 bg-white flex flex-col gap-6 p-5 pt-10 overflow-hidden">
-                                        <div className="flex justify-between items-center opacity-70 px-1">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-5 h-5 rounded-[4px] bg-[#D4AF37] flex items-center justify-center text-[10px] text-white">
-                                                    <span className="material-symbols-outlined text-[14px]">diamond</span>
+                            {/* Smartphone Mockup V2 - Titanium/Gold -> Orange iPhone 17 Pro Max */}
+                            <div className="relative w-[190px] sm:w-[280px] lg:w-[310px] h-[390px] sm:h-[580px] lg:h-[630px] z-20 transition-transform duration-1000 transform hover:scale-[1.02] drop-shadow-[0_30px_60px_rgba(0,0,0,0.4)] dark:drop-shadow-[0_30px_60px_rgba(0,0,0,0.8)]">
+                                
+                                {/* Hardware Buttons (Volume & Power) */}
+                                <div className="absolute left-[-4px] top-[100px] w-[4px] h-[25px] bg-gradient-to-b from-[#FF9D5C] to-[#A03000] rounded-l-md opacity-80 shadow-[inset_1px_0_2px_rgba(255,255,255,0.4)]"></div>
+                                <div className="absolute left-[-4px] top-[140px] w-[4px] h-[40px] bg-gradient-to-b from-[#FF9D5C] to-[#A03000] rounded-l-md opacity-80 shadow-[inset_1px_0_2px_rgba(255,255,255,0.4)]"></div>
+                                <div className="absolute left-[-4px] top-[190px] w-[4px] h-[40px] bg-gradient-to-b from-[#FF9D5C] to-[#A03000] rounded-l-md opacity-80 shadow-[inset_1px_0_2px_rgba(255,255,255,0.4)]"></div>
+                                <div className="absolute right-[-4px] top-[150px] w-[4px] h-[55px] bg-gradient-to-b from-[#FF9D5C] to-[#A03000] rounded-r-md opacity-80 shadow-[inset_-1px_0_2px_rgba(255,255,255,0.4)]"></div>
+
+                                {/* Metallic Outer Frame */}
+                                <div className="absolute inset-0 rounded-[2.6rem] sm:rounded-[3.5rem] p-[1.5px] sm:p-[2.5px] bg-gradient-to-br from-[#FFD3B6] via-[#E25822] to-[#6B2400] shadow-[inset_0_0_10px_rgba(255,255,255,0.5)]">
+                                    {/* Black Bezel & Screen Container */}
+                                    <div className="absolute inset-[1.5px] sm:inset-[2.5px] rounded-[2.5rem] sm:rounded-[3.35rem] bg-black p-[5px] sm:p-[8px] overflow-hidden shadow-[inset_0_0_20px_rgba(0,0,0,1)]">
+                                        
+                                        {/* Screen Background */}
+                                        <div className="relative w-full h-full rounded-[2.1rem] sm:rounded-[2.9rem] bg-[#FAFAFA] dark:bg-[#0B0E14] overflow-hidden flex flex-col transition-colors duration-500 shadow-[inset_0_4px_10px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)]">
+                                            
+                                            {/* Dynamic Island */}
+                                            <div className="absolute top-2 sm:top-3 left-1/2 -translate-x-1/2 w-[70px] sm:w-[95px] h-[20px] sm:h-[28px] bg-black rounded-full z-50 flex items-center justify-between px-2 sm:px-3 shadow-md">
+                                                <div className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full bg-[#1A1A1A] border-[0.5px] border-white/10 flex items-center justify-center">
+                                                    <div className="w-[3px] h-[3px] rounded-full bg-[#0F0F0F] blur-[0.3px]"></div>
                                                 </div>
-                                                <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 tracking-widest uppercase">Aurelian</span>
+                                                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-blue-500/80 shadow-[0_0_4px_rgba(59,130,246,0.8)]"></div>
                                             </div>
-                                            <span className="text-green-500 text-[10px] flex items-center gap-1 font-bold">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                                LIVE
-                                            </span>
-                                        </div>
-                                        <div className="px-1">
-                                            <div className="text-gray-400 dark:text-gray-500 text-[9px] tracking-[0.2em] mb-0.5 font-bold uppercase">XAU/USD perp</div>
-                                            <div className="text-gray-900 dark:text-white text-3xl font-display font-bold tracking-tight mb-0.5">$2,740.50</div>
-                                            <div className="text-green-500 text-[11px] font-bold">+1.25% <span className="text-gray-400 dark:text-gray-500 font-normal ml-0.5">24h</span></div>
-                                        </div>
-                                        <div className="flex-1 border border-gray-100 rounded-2xl bg-[#FBFDFF] p-4 flex items-end gap-[5px] overflow-hidden relative">
-                                            <div className="absolute inset-0 bg-gradient-to-t from-[#00D26A]/[0.05] to-transparent"></div>
-                                            {[40, 60, 45, 75, 55, 85, 50, 95, 65, 80].map((h, i) => (
-                                                <div key={i} className="relative w-full h-full flex flex-col justify-end">
-                                                    <div
-                                                        className={`w-full rounded-[1px] ${i % 3 === 0 ? 'bg-[#FFB2B2]' : 'bg-[#00D26A]'} opacity-90`}
-                                                        style={{ height: `${h}%` }}
-                                                    >
-                                                        <div className={`absolute left-1/2 -ml-px w-[1px] h-[115%] bottom-[-8%] ${i % 3 === 0 ? 'bg-[#FFB2B2]' : 'bg-[#00D26A]'} opacity-40`}></div>
+
+                                            {/* Content Padding Wrapper */}
+                                            <div className="flex flex-col h-full pt-10 sm:pt-14 pb-5 sm:pb-8 px-4 sm:px-6">
+                                                {/* App Header */}
+                                                <div className="flex items-center justify-center gap-2 mb-6 sm:mb-8">
+                                                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-[6px] sm:rounded-lg bg-gradient-to-br from-[#FDE08B] to-[#D4AF37] flex items-center justify-center shadow-md">
+                                                        <span className="material-symbols-outlined text-white text-[14px] sm:text-[18px]">diamond</span>
+                                                    </div>
+                                                    <span className="text-[11px] sm:text-[15px] font-bold text-[#8B6508] dark:text-[#D4AF37] tracking-[0.15em] uppercase font-display drop-shadow-sm">Aurelian</span>
+                                                    <div className="flex items-center gap-1.5 ml-1 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_4px_#22c55e] animate-pulse"></span>
+                                                        <span className="text-green-700 dark:text-green-400 text-[8px] sm:text-[10px] font-bold tracking-wider">LIVE</span>
                                                     </div>
                                                 </div>
-                                            ))}
+
+                                                {/* Price UI */}
+                                                <div className="px-1 mb-4 sm:mb-8">
+                                                    <div className="text-gray-500 dark:text-gray-400 text-[9px] sm:text-[12px] tracking-[0.12em] mb-1 font-bold uppercase">XAU/USD SPOT</div>
+                                                    <div className="text-gray-900 dark:text-white text-4xl sm:text-[3.5rem] leading-none font-display font-extrabold tracking-tight mb-2 sm:mb-3 transition-colors duration-500">$4,491.16</div>
+                                                    <div className="text-red-500 text-[11px] sm:text-[15px] font-bold flex items-center gap-0.5">
+                                                        <span className="material-symbols-outlined text-[16px] sm:text-[20px] -ml-1">arrow_drop_down</span>
+                                                        -1.04% <span className="text-gray-400 dark:text-gray-500 font-normal ml-1">24h</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Area Chart UI */}
+                                                <div className="flex-1 w-full bg-white dark:bg-[#0E1118] rounded-[1.2rem] sm:rounded-2xl border border-gray-100 dark:border-white/5 p-3 sm:p-5 flex flex-col relative overflow-hidden shadow-sm transition-colors duration-500">
+                                                    
+                                                    {/* Chart SVG */}
+                                                    <div className="absolute inset-0 pt-8 pb-10 sm:pb-12 px-0 flex items-end">
+                                                        <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="w-full h-full">
+                                                            <defs>
+                                                                <linearGradient id="chart-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                                    <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.9" />
+                                                                    <stop offset="60%" stopColor="#3B82F6" stopOpacity="0.8" />
+                                                                    <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.9" />
+                                                                </linearGradient>
+                                                                <linearGradient id="area-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                                    <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.25" />
+                                                                    <stop offset="60%" stopColor="#3B82F6" stopOpacity="0.15" />
+                                                                    <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+                                                                </linearGradient>
+                                                            </defs>
+                                                            {/* Area Fill */}
+                                                            <path d="M0,50 L0,30 Q5,40 10,25 T20,15 T30,35 T40,25 T50,40 T60,25 T70,35 T80,25 T90,30 T100,20 L100,50 Z" fill="url(#area-gradient)" />
+                                                            {/* Line Curve */}
+                                                            <path d="M0,30 Q5,40 10,25 T20,15 T30,35 T40,25 T50,40 T60,25 T70,35 T80,25 T90,30 T100,20" fill="none" stroke="url(#chart-gradient)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                                        </svg>
+                                                    </div>
+                                                    
+                                                    <div className="flex-1"></div>
+                                                    
+                                                    {/* X Axis Labels */}
+                                                    <div className="flex justify-between items-end relative z-10 w-full text-[8.5px] sm:text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                                                        <span>12:00</span>
+                                                        <span>19:30</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex gap-2.5 mb-3 px-1">
-                                            <div className="flex-1 bg-gray-50 text-[#00D26A] text-center py-2.5 rounded-xl font-bold text-[9px] border border-gray-100 uppercase tracking-tight">Buy / Long</div>
-                                            <div className="flex-1 bg-gray-50 text-[#FF6B6B] text-center py-2.5 rounded-xl font-bold text-[9px] border border-gray-100 uppercase tracking-tight">Sell / Short</div>
-                                        </div>
-                                    </div>
-                                    {/* Dynamic Island */}
-                                    <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-[#0A0D14] rounded-full z-40 flex items-center justify-between px-3">
-                                        <div className="flex items-center gap-1.5 flex-1">
-                                            <div className="w-1 h-1 rounded-full bg-white/5 opacity-50"></div>
-                                        </div>
-                                        <div className="w-2.5 h-2.5 rounded-full bg-[#1A1A1A] border-[0.5px] border-white/5 flex items-center justify-center">
-                                            <div className="w-1 h-1 rounded-full bg-[#0F0F0F] blur-[0.2px]"></div>
-                                        </div>
-                                        <div className="flex-1"></div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Floating Assets - Replicating Reference Layout */}
-                            {/* Left: Bitcoin resting on orbit */}
-                            <div className="absolute left-[0%] sm:left-[-22%] bottom-[33%] z-30 animate-float-medium">
-                                <img src="/stitch_bitcoin.png" alt="Bitcoin" className="w-[140px] lg:w-[240px] h-auto drop-shadow-2xl" />
+                            {/* Orbiting Assets — orbit around phone like planets around the sun */}
+                            {/* Each uses a wrapper for centering + inner div for animation to avoid transform conflicts */}
+                            
+                            {/* Bitcoin */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 pointer-events-none">
+                                <div className="animate-orbit-bitcoin" style={{ willChange: 'transform, opacity' }}>
+                                    <img src="/stitch_bitcoin.png" alt="Bitcoin" className="w-[100px] sm:w-[140px] lg:w-[200px] h-auto drop-shadow-2xl" />
+                                </div>
                             </div>
 
-                            {/* Floating Coins on Right Orbits */}
-                            <div className="absolute right-[12%] sm:right-[5%] top-[5%] z-30 animate-float" style={{ animationDelay: '0.4s' }}>
-                                <img src="/stitch_euro.png" alt="Euro" className="w-[45px] lg:w-[85px] h-auto drop-shadow-xl opacity-90" />
-                            </div>
-                            <div className="absolute right-[20%] sm:right-[12%] top-[18%] z-40 animate-float-fast" style={{ animationDelay: '0s' }}>
-                                <img src="/stitch_dollar.png" alt="Dollar" className="w-[60px] lg:w-[110px] h-auto drop-shadow-2xl" />
-                            </div>
-                            <div className="absolute right-[5%] sm:right-[0%] bottom-[38%] z-10 animate-float-slow" style={{ animationDelay: '1.2s' }}>
-                                <img src="/stitch_yen.png" alt="Yen" className="w-[50px] lg:w-[95px] h-auto drop-shadow-lg opacity-80" />
+                            {/* Euro */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 pointer-events-none">
+                                <div className="animate-orbit-euro" style={{ willChange: 'transform, opacity' }}>
+                                    <img src="/stitch_euro.png" alt="Euro" className="w-[50px] sm:w-[70px] lg:w-[100px] h-auto drop-shadow-2xl" />
+                                </div>
                             </div>
 
-                            {/* Bottom Right: Gold Bar resting on orbit */}
-                            <div className="absolute right-[2%] bottom-[12%] z-40 animate-float-medium" style={{ animationDelay: '0.8s' }}>
-                                <div className="relative group flex items-end">
-                                    <div className="z-10 transition-transform duration-500 group-hover:scale-105">
+                            {/* Yen */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 pointer-events-none">
+                                <div className="animate-orbit-yen" style={{ willChange: 'transform, opacity' }}>
+                                    <img src="/stitch_yen.png" alt="Yen" className="w-[45px] sm:w-[60px] lg:w-[85px] h-auto drop-shadow-lg" />
+                                </div>
+                            </div>
+
+                            {/* Gold Bar */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 pointer-events-none">
+                                <div className="animate-orbit-goldbar" style={{ willChange: 'transform, opacity' }}>
+                                    <div className="relative">
                                         <img
                                             src="/stitch_goldbar.png"
                                             alt="Gold Bar"
-                                            className="w-[180px] lg:w-[320px] h-auto drop-shadow-2xl rotate-[12deg]"
+                                            className="w-[130px] sm:w-[180px] lg:w-[260px] h-auto drop-shadow-2xl"
                                         />
-                                    </div>
-                                    {/* Precise Badge Style from Reference */}
-                                    <div className="absolute right-[-10px] bottom-[15%] flex flex-col items-center justify-center z-30">
-                                        <div className="bg-gradient-to-br from-[#B8860B] to-[#DAA520] px-3 py-2 lg:px-5 lg:py-2.5 rounded-[1.5rem] shadow-[0_10px_30px_rgba(184,134,11,0.5)] border border-white/30 backdrop-blur-sm">
-                                            <div className="text-white text-[8px] lg:text-[10px] font-bold tracking-widest uppercase opacity-70 mb-0.5">GOLD Bar</div>
-                                            <div className="text-white text-[10px] lg:text-[13px] font-black tracking-widest uppercase">999.9 FINE</div>
+                                        {/* Badge */}
+                                        <div className="absolute right-[-10px] bottom-[15%] flex flex-col items-center justify-center">
+                                            <div className="bg-gradient-to-br from-[#B8860B] to-[#DAA520] px-2 py-1.5 lg:px-4 lg:py-2 rounded-[1.2rem] shadow-[0_10px_30px_rgba(184,134,11,0.5)] border border-white/30 backdrop-blur-sm">
+                                                <div className="text-white text-[7px] lg:text-[9px] font-bold tracking-widest uppercase opacity-70 mb-0.5">GOLD Bar</div>
+                                                <div className="text-white text-[9px] lg:text-[12px] font-black tracking-widest uppercase">999.9 FINE</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -251,6 +365,19 @@ const Home = () => {
                         </div>
                     </div>
 
+                    {/* Mobile-only: START TRADING button below the phone */}
+                    <div className="lg:hidden flex flex-col items-center gap-3 mt-2 mb-8 px-4 fade-up visible">
+                        <div className="btn-racing-wrapper w-full">
+                            <div className="candle-racing-border"></div>
+                            <button onClick={() => navigate('/register')} className="btn-gold relative z-10 px-6 py-3 text-sm shadow-glow-strong w-full">
+                                <span className="relative flex items-center justify-center gap-3">
+                                    START TRADING
+                                    <span className="material-symbols-outlined transition-transform">trending_up</span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Stats Grid - Moved inside max-w-7xl below the hero grid */}
                     <div className="col-span-12 grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4 mb-16 fade-up visible">
                         {[
@@ -261,7 +388,7 @@ const Home = () => {
                         ].map((stat, i) => (
                             <div key={i} className="glass-panel p-5 rounded-xl flex flex-col items-center justify-center hover:border-primary/40 transition-all group hover:-translate-y-1">
                                 <span className="text-3xl font-display font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors drop-shadow-sm">{stat.val}</span>
-                                <span className="text-[10px] text-text-muted uppercase tracking-widest mt-1 font-bold">{stat.label}</span>
+                                <span className="text-[10px] text-text-muted mt-1 font-bold">{stat.label}</span>
                             </div>
                         ))}
                     </div>
@@ -307,7 +434,7 @@ const Home = () => {
                         <div className="col-span-1 lg:col-span-6 lg:col-start-4 lg:row-start-1 lg:row-span-3 glass-panel p-4 lg:p-6 rounded-2xl relative overflow-hidden group hover:bg-surface-light/40 transition-colors duration-500 flex flex-col justify-between">
                             <div className="flex flex-col sm:flex-row justify-between items-start lg:items-center gap-2 mb-4 z-10">
                                 <div>
-                                    <h3 className="font-bold text-text-muted text-[9px] lg:text-[10px] uppercase tracking-widest mb-1">Total Market Cap</h3>
+                                    <h3 className="font-bold text-text-muted text-[10px] mb-1">Total Market Cap</h3>
                                     <span className="text-gray-900 dark:text-white font-display font-bold text-xl lg:text-3xl tracking-tight drop-shadow-sm">$3.17T</span>
                                 </div>
                                 <span className="text-success text-[10px] lg:text-xs font-bold bg-success/10 px-1.5 py-0.5 lg:px-2 lg:py-1 rounded border border-success/20 flex items-center gap-1 shadow-glow-success self-start">
@@ -331,7 +458,7 @@ const Home = () => {
                         {/* Fear & Greed */}
                         <div className="col-span-2 lg:col-span-3 lg:col-start-10 lg:row-start-1 lg:row-span-3 glass-panel p-4 lg:p-6 rounded-2xl flex flex-col items-center justify-center group hover:bg-surface-light/40">
                             <div className="w-full flex justify-between items-center mb-2">
-                                <h3 className="font-bold text-text-muted text-[10px] uppercase tracking-widest">Fear & Greed</h3>
+                                <h3 className="font-bold text-text-muted text-[10px]">Fear & Greed</h3>
                                 <span className="material-symbols-outlined text-text-subtle text-sm">info</span>
                             </div>
                             <div className="w-28 lg:w-full max-w-[160px] aspect-[2/1] relative">
@@ -345,7 +472,7 @@ const Home = () => {
                             </div>
                             <div className="text-center">
                                 <div className="text-3xl font-bold text-gray-900 dark:text-white font-display">24</div>
-                                <div className="text-[10px] text-danger font-bold uppercase tracking-widest bg-danger/10 px-2 py-0.5 rounded mt-1">Extreme Fear</div>
+                                <div className="text-[10px] text-danger font-bold bg-danger/10 px-2 py-0.5 rounded mt-1">Extreme Fear</div>
                             </div>
                         </div>
                     </div>
@@ -361,40 +488,40 @@ const Home = () => {
                             <h2 className="text-3xl md:text-4xl font-display font-bold text-gray-900 dark:text-white mb-2">Market Overview</h2>
                             <p className="text-text-muted text-sm">Real-time prices from the world's leading digital exchanges</p>
                         </div>
-                        <div className="flex space-x-1 bg-surface-dark p-1 rounded-lg border border-border-subtle">
+                        <div className="flex space-x-1 bg-surface-dark p-1 rounded-lg border border-border-subtle overflow-x-auto w-full md:w-auto max-w-full hide-scrollbar">
                             {['crypto', 'forex', 'indices', 'commodities'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`px-5 py-2 rounded-md text-xs uppercase tracking-wider transition-all ${activeTab === tab
+                                    className={`px-3 sm:px-5 py-2 rounded-md text-[10px] sm:text-xs font-bold transition-all ${activeTab === tab
                                         ? 'bg-gradient-gold text-black font-bold shadow-glow'
                                         : 'text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5'
                                         }`}
                                 >
-                                    {tab}
+                                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
                                 </button>
                             ))}
                         </div>
                     </div>
-                    <div className="overflow-x-auto rounded-xl border border-border-subtle bg-surface-dark/40 backdrop-blur-sm min-h-[400px] relative glass-panel">
+                    <div className="overflow-x-auto rounded-xl border border-border-subtle bg-surface-dark/40 backdrop-blur-sm min-h-[400px] relative glass-panel w-full hide-scrollbar">
                         {activeTab === 'crypto' ? (
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full text-left border-collapse whitespace-nowrap">
                                 <thead>
-                                    <tr className="text-text-muted text-[10px] uppercase tracking-[0.1em] border-b border-white/5 bg-surface-light/30">
-                                        <th className="py-4 pl-8 font-semibold">Asset</th>
+                                    <tr className="text-text-muted text-[10px] border-b border-white/5 bg-surface-light/30">
+                                        <th className="py-4 pl-4 md:pl-8 font-semibold">Asset</th>
                                         <th className="py-4 font-semibold">Price</th>
                                         <th className="py-4 font-semibold">24h Change</th>
                                         <th className="py-4 font-semibold hidden md:table-cell">Market Cap</th>
                                         <th className="py-4 font-semibold hidden lg:table-cell">Volume (24h)</th>
-                                        <th className="py-4 font-semibold text-right pr-8">Trend (7d)</th>
+                                        <th className="py-4 font-semibold text-right pr-4 md:pr-8 hidden sm:table-cell">Trend (7d)</th>
                                     </tr>
                                 </thead>
                                 <tbody className="text-text-muted font-medium text-sm">
                                     {marketAssets.filter(a => a.type === 'crypto').map((asset) => (
                                         <tr key={asset.symbol} className="hover:bg-white/5 transition-colors border-b border-white/5 group cursor-pointer" onClick={() => navigate('/market')}>
-                                            <td className="py-4 pl-8">
-                                                <div className="flex items-center gap-4">
-                                                    <img alt={asset.sub} className="w-8 h-8 rounded-full ring-2 ring-transparent group-hover:ring-primary/50 transition-all" src={getIconUrl(asset.symbol)} onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/6001/6001368.png' }} />
+                                            <td className="py-4 pl-4 md:pl-8 border-none">
+                                                <div className="flex items-center gap-3 md:gap-4">
+                                                    <img alt={asset.sub} className="w-7 h-7 md:w-8 md:h-8 rounded-full ring-2 ring-transparent group-hover:ring-primary/50 transition-all" src={getIconUrl(asset.symbol)} onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/6001/6001368.png' }} />
                                                     <div>
                                                         <span className="font-bold text-gray-900 dark:text-white block group-hover:text-primary transition-colors">{asset.sub}</span>
                                                         <span className="text-text-muted text-[10px] tracking-wide">{asset.name}</span>
@@ -405,7 +532,7 @@ const Home = () => {
                                             <td className="py-4"><span className={`${asset.change.startsWith('-') ? 'text-danger' : 'text-success'} flex items-center gap-1 text-xs font-bold shadow-glow-${asset.change.startsWith('-') ? 'danger' : 'success'}/20`}><span className="material-symbols-outlined text-sm">{asset.change.startsWith('-') ? 'arrow_drop_down' : 'arrow_drop_up'}</span> {asset.change.replace(/[+-]/, '')}</span></td>
                                             <td className="py-4 hidden md:table-cell text-text-muted font-display text-xs">{asset.cap}</td>
                                             <td className="py-4 hidden lg:table-cell text-text-muted font-display text-xs">-</td>
-                                            <td className="py-4 text-right pr-8">
+                                            <td className="py-4 text-right pr-4 md:pr-8 hidden sm:table-cell border-none">
                                                 <svg className={`w-20 h-8 inline-block ${asset.change.startsWith('-') ? 'text-danger' : 'text-success'} opacity-80`} fill="none" stroke="currentColor" viewBox="0 0 100 40"><path d={asset.change.startsWith('-') ? "M0 10 L 20 25 L 40 10 L 60 10 L 100 10" : "M0 25 L 30 25 L 50 35 L 70 15 L 100 5"} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"></path></svg>
                                             </td>
                                         </tr>
@@ -480,7 +607,7 @@ const Home = () => {
 
             {/* Why Choose Us */}
             <section className="py-24 relative overflow-hidden bg-background-dark">
-                <div className="max-max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-20 fade-up">
                         <h2 className="text-3xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mb-4">
                             Your Secure Partner for Digital Assets
@@ -498,7 +625,7 @@ const Home = () => {
                                 <div className="w-16 h-16 rounded-full bg-surface-dark border border-primary/30 flex items-center justify-center text-primary mb-6 shadow-glow">
                                     <span className="material-symbols-outlined text-2xl group-hover:text-white transition-colors">{item.icon}</span>
                                 </div>
-                                <h3 className="text-gray-900 dark:text-white font-bold text-sm uppercase tracking-wider mb-2">{item.title}</h3>
+                                <h3 className="text-gray-900 dark:text-white font-bold text-sm mb-2">{item.title}</h3>
                                 <p className="text-text-muted text-xs max-w-[200px] leading-relaxed">{item.desc}</p>
                             </div>
                         ))}
@@ -517,18 +644,18 @@ const Home = () => {
                                         <span className="material-symbols-outlined text-primary text-lg">diamond</span>
                                     </div>
                                 </div>
-                                <span className="text-lg font-display font-bold tracking-widest text-gray-900 dark:text-white uppercase">Aurelian TD</span>
+                                <span className="text-lg font-display font-bold tracking-tight text-gray-900 dark:text-white">Aurelian TD</span>
                             </div>
                             <p className="text-gray-500 text-sm leading-relaxed mb-8 max-w-sm">
                                 The premier destination for institutional and retail crypto futures trading. Secure, fast, and reliable. Built for the future of finance.
                             </p>
                         </div>
                         <div>
-                            <h4 className="text-gray-900 dark:text-white text-xs font-bold uppercase tracking-wider mb-6">Support</h4>
-                            <ul className="space-y-4 text-xs text-gray-500">
-                                <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
-                                <li><a href="#" className="hover:text-primary transition-colors">Submit Request</a></li>
-                                <li><a href="#" className="hover:text-primary transition-colors">Legal & Compliance</a></li>
+                            <h4 className="text-gray-900 dark:text-white text-xs font-bold mb-6">Support</h4>
+                            <ul className="space-y-4 text-xs text-gray-500 font-medium">
+                                <li><button onClick={() => navigate('/help')} className="hover:text-primary transition-all">Help Center</button></li>
+                                <li><button onClick={() => navigate('/submit-request')} className="hover:text-primary transition-all">Submit Request</button></li>
+                                <li><button onClick={() => navigate('/compliance')} className="hover:text-primary transition-all">Legal & Compliance</button></li>
                             </ul>
                         </div>
                     </div>
@@ -537,46 +664,12 @@ const Home = () => {
                         <p>© 2026 Aurelian TD Trade. All rights reserved.</p>
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-500">
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                            <span className="font-bold uppercase tracking-wider">System Operational</span>
+                            <span className="font-bold">System operational</span>
                         </div>
                     </div>
                 </div>
             </footer>
 
-            {/* Ticker Overlay - Back at the Bottom */}
-            <div className="fixed bottom-16 lg:bottom-0 left-0 w-full bg-[#05080F]/95 backdrop-blur-md border-t border-white/10 py-2 z-40 flex overflow-hidden">
-                <div className="ticker-scroll flex gap-12 whitespace-nowrap pl-4">
-                    {marketAssets.map((asset) => (
-                        <div key={asset.symbol} className="flex items-center gap-2 text-xs font-mono">
-                            <img src={getIconUrl(asset.symbol)} alt="" className="w-4 h-4 rounded-full" onError={(e) => { e.target.style.display = 'none' }} />
-                            <span className="text-gray-400">{asset.sub}</span>
-                            <span className={`${asset.change.startsWith('-') ? 'text-red-500' : 'text-green-500'}`}>
-                                {asset.price} {asset.change.startsWith('-') ? '▼' : '▲'} {asset.change.replace(/[+-]/, '')}
-                            </span>
-                        </div>
-                    ))}
-                    {/* Duplicate for seamless loop */}
-                    {marketAssets.map((asset) => (
-                        <div key={`dup-${asset.symbol}`} className="flex items-center gap-2 text-xs font-mono">
-                            <img src={getIconUrl(asset.symbol)} alt="" className="w-4 h-4 rounded-full" onError={(e) => { e.target.style.display = 'none' }} />
-                            <span className="text-gray-400">{asset.sub}</span>
-                            <span className={`${asset.change.startsWith('-') ? 'text-red-500' : 'text-green-500'}`}>
-                                {asset.price} {asset.change.startsWith('-') ? '▼' : '▲'} {asset.change.replace(/[+-]/, '')}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-                <style>{`
-                    @keyframes tickerScroll {
-                        0% { transform: translateX(0); }
-                        100% { transform: translateX(-50%); }
-                    }
-                    .ticker-scroll {
-                        animation: tickerScroll 120s linear infinite;
-                        width: max-content;
-                    }
-                `}</style>
-            </div>
         </div>
     );
 };

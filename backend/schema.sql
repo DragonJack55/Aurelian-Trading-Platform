@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(255),
     username VARCHAR(100),
     points DECIMAL(10,2) DEFAULT 0.00,
+    btc_balance DECIMAL(15,8) DEFAULT 0.00000000,
+    eth_balance DECIMAL(15,8) DEFAULT 0.00000000,
     status ENUM('pending', 'approved', 'rejected', 'frozen') DEFAULT 'pending',
     verification_status ENUM('pending', 'verified', 'rejected') DEFAULT 'pending',
     trade_result ENUM('win', 'lose', 'normal') DEFAULT 'normal',

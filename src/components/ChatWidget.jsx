@@ -8,7 +8,7 @@ const ChatWidget = () => {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [unreadCount, setUnreadCount] = useState(0);
-    const [position, setPosition] = useState({ x: 24, y: 100 });
+    const [position, setPosition] = useState({ x: 24, y: 160 });
     const [isDraggingState, setIsDraggingState] = useState(false);
     const isDragging = useRef(false);
     const dragStart = useRef({ x: 0, y: 0 });
@@ -123,7 +123,8 @@ const ChatWidget = () => {
     useEffect(() => {
         if (isChatOpen && user?.email && unreadCount > 0) {
             markMessagesAsRead(user.email);
-            setUnreadCount(0);
+            // Use a functional update or defer to avoid cascading render warning
+            setTimeout(() => setUnreadCount(0), 0);
         }
     }, [isChatOpen, user, unreadCount]);
 
@@ -211,7 +212,7 @@ const ChatWidget = () => {
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
-                onClick={(e) => {
+                onClick={() => {
                     if (!isDragging.current) setIsChatOpen(true);
                 }}
                 style={{
@@ -403,7 +404,7 @@ const ChatWidget = () => {
                                 }}
                             />
                             <button
-                                onClick={(e) => {
+                                onClick={() => {
                                     console.log('[ChatWidget] Send button clicked!', {
                                         hasMessage: !!inputMessage.trim(),
                                         userEmail: user?.email,

@@ -20,11 +20,11 @@ const formatNumber = (num) => {
 
 const investmentOptions = [
     { time: '30 seconds', profit: 5, min: 100 },
-    { time: '60 seconds', profit: 10, min: 10000 },
-    { time: '90 seconds', profit: 15, min: 50000 },
-    { time: '120 seconds', profit: 20, min: 100000 },
-    { time: '180 seconds', profit: 25, min: 300000 },
-    { time: '360 seconds', profit: 30, min: 500000 }
+    { time: '60 seconds', profit: 10, min: 500 },
+    { time: '90 seconds', profit: 15, min: 1000 },
+    { time: '120 seconds', profit: 20, min: 2500 },
+    { time: '180 seconds', profit: 25, min: 5000 },
+    { time: '360 seconds', profit: 30, min: 10000 }
 ];
 
 const assets = [
@@ -79,6 +79,44 @@ const Trading = () => {
 
     const [isTrading, setIsTrading] = useState(false);
     const [selectedTimeframe, setSelectedTimeframe] = useState('1h');
+
+    // Derived values for trading parameters
+    const currentOption = investmentOptions[selectedTime];
+    const amountNum = parseFloat(amount) || 0;
+    const finalProfitRate = currentUser?.isVIP ? currentOption.profit + 5 : currentOption.profit;
+    const expectedProfit = (amountNum * (finalProfitRate / 100)).toFixed(2);
+    const minAmount = currentOption.min;
+
+    const [displayProfit, setDisplayProfit] = useState(0);
+    const displayProfitRef = React.useRef(0);
+
+    // Count-up animation for payout
+    useEffect(() => {
+        const start = displayProfitRef.current;
+        const end = expectedProfit;
+        if (Math.abs(start - end) < 0.01) return;
+
+        const duration = 400; // ms
+        const startTime = performance.now();
+
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Ease out quad
+            const easedProgress = progress * (2 - progress);
+            const currentVal = start + (end - start) * easedProgress;
+            
+            displayProfitRef.current = currentVal;
+            setDisplayProfit(currentVal);
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        requestAnimationFrame(animate);
+    }, [expectedProfit]);
 
     const priceRef = React.useRef(price);
     const tradesRef = React.useRef(trades);
@@ -311,11 +349,6 @@ const Trading = () => {
         return num.toFixed(2);
     };
 
-    const currentOption = investmentOptions[selectedTime];
-    const amountNum = parseFloat(amount) || 0;
-    const finalProfitRate = currentUser?.isVIP ? currentOption.profit + 5 : currentOption.profit;
-    const expectedProfit = (amountNum * (finalProfitRate / 100)).toFixed(2);
-    const minAmount = currentOption.min;
     const activeTrades = trades.filter(t => t.status === 'pending');
     const historyTrades = trades.filter(t => t.status === 'completed');
 
@@ -328,7 +361,7 @@ const Trading = () => {
     }, []);
 
     return (
-        <div className="flex flex-col h-[calc(100vh-100px)] bg-background-base text-gray-900 dark:text-gray-300 overflow-hidden overflow-x-hidden max-w-[100vw]">
+        <div className="flex flex-col min-h-screen bg-background-base text-gray-900 dark:text-gray-300 max-w-[100vw]">
             {/* Asset Selection Menu - Overlay */}
             <div className={`fixed inset-y-0 left-0 w-80 bg-surface-light dark:bg-surface-dark z-[2000] transform transition-transform duration-300 shadow-2xl border-r border-border-light dark:border-border-gold/20 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-6 border-b border-border-light dark:border-border-gold/20 flex justify-between items-center bg-gray-50 dark:bg-surface-dark">
@@ -360,7 +393,7 @@ const Trading = () => {
             {isMenuOpen && <div onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1900]"></div>}
 
             {/* Top Bar for Chart Controls */}
-            <div className="px-3 lg:px-6 py-3 bg-background-base border-b border-border-light dark:border-border-subtle flex justify-between items-center shadow-lg relative z-20 overflow-hidden">
+            <div className="sticky top-0 lg:top-[72px] px-3 lg:px-6 py-3 bg-background-base/80 backdrop-blur-md border-b border-border-light dark:border-border-subtle flex justify-between items-center shadow-lg z-30 overflow-hidden transition-all duration-300">
                 <div className="flex items-center gap-3 lg:gap-6 min-w-0 flex-shrink">
                     <div className="flex items-center gap-2 lg:gap-4 cursor-pointer group min-w-0 flex-shrink" onClick={() => setIsMenuOpen(true)}>
                         <div className="p-1.5 lg:p-2 -ml-1 rounded-lg hover:bg-surface-light/10 transition-colors flex-shrink-0">
@@ -383,15 +416,15 @@ const Trading = () => {
                     {!isMobile && (
                         <div className="flex gap-8 text-xs font-medium border-l border-white/5 pl-8 ml-2 h-8 items-center">
                             <div className="flex flex-col justify-between h-full">
-                                <span className="text-[9px] uppercase tracking-widest text-text-subtle font-bold">24h High</span>
+                                <span className="text-[10px] text-text-muted font-bold">24h High</span>
                                 <span className="text-gray-700 dark:text-gray-200 font-mono text-[11px]">{price.h}</span>
                             </div>
                             <div className="flex flex-col justify-between h-full">
-                                <span className="text-[9px] uppercase tracking-widest text-text-subtle font-bold">24h Low</span>
+                                <span className="text-[10px] text-text-muted font-bold">24h Low</span>
                                 <span className="text-gray-700 dark:text-gray-200 font-mono text-[11px]">{price.l}</span>
                             </div>
                             <div className="flex flex-col justify-between h-full">
-                                <span className="text-[9px] uppercase tracking-widest text-text-subtle font-bold">24h Vol</span>
+                                <span className="text-[10px] text-text-muted font-bold">24h Volume</span>
                                 <span className="text-primary font-mono text-[11px]">{formatVolume(price.v)}</span>
                             </div>
                         </div>
@@ -417,33 +450,40 @@ const Trading = () => {
             </div>
 
             {/* Main Layout (Responsive) */}
-            <div className="flex flex-1 overflow-hidden flex-col lg:flex-row relative">
+            <div className="flex flex-1 lg:overflow-hidden flex-col lg:flex-row relative">
 
                 {/* 1. Chart Section */}
-                <div className="flex-1 bg-gray-50 dark:bg-background-base relative border-b lg:border-r border-gray-200 dark:border-border-subtle h-[400px] lg:h-auto z-0">
+                <div className="flex-1 bg-gray-50 dark:bg-background-base relative border-b lg:border-r border-gray-200 dark:border-border-subtle h-[320px] sm:h-[400px] lg:h-auto z-0">
                     <TradingViewWidget symbol={activeSymbol.tvSymbol} interval={selectedTimeframe} />
                 </div>
 
                 {/* 2. Trading Controls */}
-                <div className="w-full lg:w-[340px] bg-white dark:bg-surface-dark z-10 flex flex-col border-l border-gray-200 dark:border-border-gold/10 shadow-xl overflow-y-auto custom-scrollbar">
+                <div className="w-full lg:w-[340px] bg-white dark:bg-surface-dark z-10 flex flex-col lg:border-l border-gray-200 dark:border-border-gold/10 shadow-xl lg:overflow-y-auto custom-scrollbar">
 
                     <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
                         {/* Time Setting */}
                         <div>
-                            <div className="text-[10px] font-bold text-text-muted uppercase mb-3 flex items-center gap-2">
+                            <div className="text-[10px] font-bold text-text-muted mb-3 flex items-center gap-2">
                                 <span className="material-symbols-outlined text-sm">schedule</span>
-                                Expiration Time
+                                Expiration time
                             </div>
                             <div className="grid grid-cols-3 gap-2">
                                 {investmentOptions.map((option, index) => (
                                     <button key={index} onClick={() => setSelectedTime(index)}
-                                        className={`p-3 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all duration-200 ${selectedTime === index
-                                            ? 'bg-primary/10 border-primary/50 text-gray-900 dark:text-white shadow-glow-strong'
+                                        className={`group p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all duration-300 relative overflow-hidden ${selectedTime === index
+                                            ? 'bg-primary/10 border-primary/50 text-gray-900 dark:text-white shadow-glow-strong scale-105'
                                             : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-transparent hover:border-primary/30 dark:hover:border-white/10 text-gray-600 dark:text-gray-400'
                                             }`}
                                     >
-                                        <span className="text-sm font-bold">{option.time.split(' ')[0]}s</span>
-                                        <span className="text-[10px] font-medium opacity-80">{option.profit}%</span>
+                                        <span className={`text-[11px] font-bold uppercase tracking-wider ${selectedTime === index ? 'text-primary' : 'text-text-muted'}`}>
+                                            {option.time.split(' ')[0] < 60 ? `${option.time.split(' ')[0]}s` : `${parseInt(option.time.split(' ')[0]) / 60}m`}
+                                        </span>
+                                        <span className={`text-sm font-black transition-colors ${selectedTime === index ? 'text-primary' : 'text-primary opacity-90 group-hover:opacity-100'}`}>
+                                            {option.profit}%
+                                        </span>
+                                        {index === investmentOptions.length - 1 && (
+                                            <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-gold animate-pulse"></div>
+                                        )}
                                     </button>
                                 ))}
                             </div>
@@ -452,7 +492,7 @@ const Trading = () => {
                         {/* Amount Input */}
                         <div>
                             <div className="flex justify-between mb-2">
-                                <span className="text-[10px] font-bold text-text-muted uppercase">Amount</span>
+                                <span className="text-[10px] font-bold text-text-muted">Amount</span>
                                 <span className="text-[10px] text-text-muted">
                                     Wallet: <span className="text-gray-900 dark:text-white font-bold">{currentUser ? formatNumber((currentUser.balance || 0).toFixed(2)) : '0.00'}</span>
                                 </span>
@@ -480,30 +520,35 @@ const Trading = () => {
                                 <span className="text-xs font-medium text-text-muted">Est. Payout</span>
                                 {currentUser?.isVIP && <span className="text-[10px] text-primary font-bold">{finalProfitRate}% Return</span>}
                             </div>
-                            <span className="text-lg font-bold text-success font-mono">+${formatNumber(expectedProfit)}</span>
+                            <span className="text-lg font-bold text-success font-mono">
+                                +${formatNumber(displayProfit.toFixed(2))}
+                            </span>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
-                                onClick={() => handleTrade('up')}
-                                disabled={isTrading}
-                                className="py-4 bg-success hover:bg-green-600 text-white rounded-xl font-bold shadow-glow-success active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center group relative overflow-hidden"
-                            >
-                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                                <span className="text-sm tracking-widest relative z-10">LONG</span>
-                                <span className="text-[10px] opacity-80 relative z-10">BUY</span>
-                            </button>
-                            <button
-                                onClick={() => handleTrade('down')}
-                                disabled={isTrading}
-                                className="py-4 bg-danger hover:bg-red-600 text-white rounded-xl font-bold shadow-glow-danger active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center group relative overflow-hidden"
-                            >
-                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                                <span className="text-sm tracking-widest relative z-10">SHORT</span>
-                                <span className="text-[10px] opacity-80 relative z-10">SELL</span>
-                            </button>
+                        {/* Action Buttons - Sticky on Mobile, Relative on Desktop */}
+                        <div className="fixed bottom-[72px] left-0 right-0 p-4 bg-background-base/80 dark:bg-background-base/60 backdrop-blur-xl border-t border-gray-200/10 dark:border-white/5 z-40 lg:relative lg:bottom-0 lg:p-0 lg:bg-transparent lg:border-none lg:backdrop-blur-none transition-all duration-300">
+                            <div className="grid grid-cols-2 gap-4 max-w-7xl mx-auto px-2">
+                                <button
+                                    onClick={() => handleTrade('up')}
+                                    disabled={isTrading}
+                                    className="py-4 bg-success hover:bg-green-600 text-white rounded-2xl font-bold shadow-lg shadow-success/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center group relative overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                                    <span className="text-base tracking-[0.2em] font-extrabold relative z-10">LONG</span>
+                                </button>
+                                <button
+                                    onClick={() => handleTrade('down')}
+                                    disabled={isTrading}
+                                    className="py-4 bg-danger hover:bg-red-600 text-white rounded-2xl font-bold shadow-lg shadow-danger/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center group relative overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                                    <span className="text-base tracking-[0.2em] font-extrabold relative z-10">SHORT</span>
+                                </button>
+                            </div>
                         </div>
+
+                        {/* Spacer for sticky buttons on mobile */}
+                        <div className="h-24 lg:hidden"></div>
                     </div>
 
                     {/* Positions List (Mini) */}
@@ -513,12 +558,12 @@ const Trading = () => {
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-wider transition-colors border-b-2 ${activeTab === tab
+                                    className={`flex-1 py-3 text-[11px] font-bold tracking-tight transition-colors border-b-2 ${activeTab === tab
                                         ? 'border-primary text-primary bg-white/5'
                                         : 'border-transparent text-gray-400 hover:text-gray-300'
                                         }`}
                                 >
-                                    {tab === 'transaction' ? `Open Positions (${activeTrades.length})` : 'History'}
+                                    {tab === 'transaction' ? `Open positions (${activeTrades.length})` : 'History'}
                                 </button>
                             ))}
                         </div>
