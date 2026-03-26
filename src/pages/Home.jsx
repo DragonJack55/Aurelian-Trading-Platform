@@ -198,7 +198,7 @@ const Home = () => {
                         </div>
 
                         {/* Right Column: 3D Visualization Asset */}
-                        <div className="relative z-0 h-[380px] sm:h-[600px] lg:h-[750px] flex items-center justify-center translate-x-4 sm:translate-x-0 lg:translate-x-6 -mt-48 sm:-mt-64 lg:mt-0 opacity-50 lg:opacity-100">
+                        <div className="relative z-10 h-[380px] sm:h-[600px] lg:h-[750px] flex items-center justify-center translate-x-4 sm:translate-x-0 lg:translate-x-6 -mt-48 sm:-mt-64 lg:mt-0 lg:opacity-100">
 
                             {/* Background Radial Glow - subtle institutional look */}
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[140px] pointer-events-none"></div>
