@@ -426,35 +426,38 @@ const Admin = () => {
             setLoginHistory(data);
         });
 
-        const initData = async () => {
+        const initData = () => {
             // Load first page of users
-            const uResult = await getUsersPaginated(null, 20);
-            if (uResult.success) {
-                setUsers(uResult.users);
-                setLastUserDoc(uResult.lastDoc);
-                setHasMoreUsers(uResult.hasMore);
-            }
+            getUsersPaginated(null, 20).then(uResult => {
+                if (uResult.success) {
+                    setUsers(uResult.users);
+                    setLastUserDoc(uResult.lastDoc);
+                    setHasMoreUsers(uResult.hasMore);
+                }
+            });
 
-            // Initial verification load is now handled by subscription
-            // But we still need pagination state if we keep using it for 'load more'
-            const vResult = await getVerificationsPaginated(null, 10);
-            if (vResult.success) {
-                setLastVerificationDoc(vResult.lastDoc);
-                setHasMoreVerifications(vResult.hasMore);
-            }
+            // Initial verification load
+            getVerificationsPaginated(null, 10).then(vResult => {
+                if (vResult.success) {
+                    setLastVerificationDoc(vResult.lastDoc);
+                    setHasMoreVerifications(vResult.hasMore);
+                }
+            });
 
             // Load first page of withdrawals
-            const wResult = await getWithdrawalsPaginated(null, 20);
-            if (wResult.success) {
-                setWithdrawals(wResult.withdrawals);
-                setLastWithdrawalDoc(wResult.lastDoc);
-                setHasMoreWithdrawals(wResult.hasMore);
-            }
+            getWithdrawalsPaginated(null, 20).then(wResult => {
+                if (wResult.success) {
+                    setWithdrawals(wResult.withdrawals);
+                    setLastWithdrawalDoc(wResult.lastDoc);
+                    setHasMoreWithdrawals(wResult.hasMore);
+                }
+            });
 
-            const dSettings = await getDepositSettings();
-            if (dSettings.success) {
-                setDepositSettings(dSettings.settings || {});
-            }
+            getDepositSettings().then(dSettings => {
+                if (dSettings.success) {
+                    setDepositSettings(dSettings.settings || {});
+                }
+            });
         };
 
         initData();
