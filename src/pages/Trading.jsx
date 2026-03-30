@@ -274,8 +274,8 @@ const Trading = () => {
             return;
         }
 
-        // Check both verification_status (DB field) and status (Mock/Legacy)
-        const isVerified = currentUser.verification_status === 'verified' || currentUser.status === 'approved';
+        // Check both verificationStatus (DB field) and status (Mock/Legacy)
+        const isVerified = currentUser.verificationStatus === 'verified' || currentUser.status === 'approved';
         if (!isVerified) {
             alert('Please complete identity verification to trade');
             return;

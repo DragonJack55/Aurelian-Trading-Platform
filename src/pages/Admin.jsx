@@ -2057,11 +2057,11 @@ const Admin = () => {
                             </div>
 
                             {/* Chat Area */}
-                            <div className="flex-1 flex flex-col bg-black/20">
+                            <div className="flex-1 flex flex-col bg-black/20 min-h-0 h-full">
                                 {selectedUserId ? (
                                     <>
                                         {/* Chat Header */}
-                                        <div className="p-4 border-b border-white/5 flex justify-between items-center bg-[#0a0f1c]/95 backdrop-blur-md">
+                                        <div className="p-4 border-b border-white/5 flex justify-between items-center bg-[#0a0f1c]/95 backdrop-blur-md flex-shrink-0">
                                             <div className="flex items-center gap-3">
                                                 <button
                                                     onClick={() => setSelectedUserId(null)}
@@ -2109,17 +2109,17 @@ const Admin = () => {
                                         </div>
 
                                         {/* Input */}
-                                        <div className="p-4 border-t border-white/5 bg-[#0a0f1c]/95 backdrop-blur-md">
+                                        <div className="p-4 border-t border-white/5 bg-[#0a0f1c]/95 backdrop-blur-md flex-shrink-0">
                                             {/* AI rewrite badge */}
                                             {isRewriting && (
-                                                <div className="flex items-center gap-2 mb-2 px-1">
+                                                <div className="flex items-center gap-2 mb-2 px-1 flex-shrink-0">
                                                     <Sparkles size={12} className="text-primary animate-pulse" />
                                                     <span className="text-[10px] text-primary font-medium tracking-wide">Rewriting with AI...</span>
                                                 </div>
                                             )}
                                             <form
                                                 onSubmit={(e) => { e.preventDefault(); handleSendReply(); }}
-                                                className={`flex gap-3 border rounded-xl p-2 transition-all duration-300 ${
+                                                className={`flex-shrink-0 flex gap-3 border rounded-xl p-2 transition-all duration-300 ${
                                                     isRewriting 
                                                         ? 'bg-primary/5 border-primary/40 shadow-[0_0_12px_rgba(212,175,55,0.15)]' 
                                                         : 'bg-black/40 border-white/10 focus-within:border-primary/50 focus-within:bg-black/60'

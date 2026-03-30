@@ -44,7 +44,7 @@ const ContractDetail = ({ contract, onClose }) => {
                     overflowY: 'auto',
                     position: 'relative',
                     background: '#121212',
-                    border: '1px solid var(--primary-gold)',
+                    border: '1px solid #D4AF37',
                     boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
                     borderRadius: '16px',
                     padding: 0
@@ -59,10 +59,10 @@ const ContractDetail = ({ contract, onClose }) => {
                     alignItems: 'center',
                     background: 'linear-gradient(to right, rgba(212, 175, 55, 0.1), transparent)'
                 }}>
-                    <h2 className="gold-text" style={{ fontSize: '18px', fontWeight: '800', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                    <h2 style={{ color: '#D4AF37', fontSize: '18px', fontWeight: '800', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
                         {contract.symbol}
                     </h2>
-                    <X onClick={onClose} style={{ cursor: 'pointer', color: 'var(--text-secondary)', transition: 'color 0.2s' }} size={20} />
+                    <X onClick={onClose} style={{ cursor: 'pointer', color: '#9ca3af', transition: 'color 0.2s' }} size={20} />
                 </div>
 
                 <div style={{ padding: '24px' }}>
@@ -78,7 +78,7 @@ const ContractDetail = ({ contract, onClose }) => {
                         <div style={{
                             fontSize: '48px',
                             fontWeight: '800',
-                            color: isPending ? 'var(--primary-gold)' : (isProfit ? '#22c55e' : '#ef4444'),
+                            color: isPending ? '#D4AF37' : (isProfit ? '#22c55e' : '#ef4444'),
                             marginBottom: '8px',
                             letterSpacing: '-1px',
                             textShadow: isPending ? '0 0 20px rgba(212, 175, 55, 0.3)' : (isProfit ? '0 0 20px rgba(34, 197, 94, 0.3)' : '0 0 20px rgba(239, 68, 68, 0.3)')
@@ -88,7 +88,7 @@ const ContractDetail = ({ contract, onClose }) => {
                         {!isPending && (
                             <div style={{
                                 fontSize: '12px',
-                                color: 'var(--text-secondary)',
+                                color: '#9ca3af',
                                 fontWeight: '700',
                                 textTransform: 'uppercase',
                                 letterSpacing: '2px',
@@ -98,7 +98,7 @@ const ContractDetail = ({ contract, onClose }) => {
                             </div>
                         )}
                         {isPending && (
-                            <div style={{ fontSize: '12px', color: 'var(--primary-gold)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px', animation: 'pulse 2s infinite' }}>
+                            <div style={{ fontSize: '12px', color: '#D4AF37', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px', animation: 'pulse 2s infinite' }}>
                                 Awaiting Delivery
                             </div>
                         )}
@@ -113,11 +113,11 @@ const ContractDetail = ({ contract, onClose }) => {
                     }}>
                         {[
                             { label: 'Trading Direction', value: contract.direction === 'up' ? 'Buy Up / Long' : 'Buy Down / Short', color: contract.direction === 'up' ? '#22c55e' : '#ef4444' },
-                            { label: 'Contract Number', value: contractNumber, color: 'var(--text-secondary)', mono: true },
+                            { label: 'Contract Number', value: contractNumber, color: '#9ca3af', mono: true },
                             { label: 'Opening Price', value: contract.entryPrice },
-                            { label: 'Closing Price', value: contract.exitPrice || 'Pending...', color: !contract.exitPrice && 'var(--primary-gold)' },
+                            { label: 'Closing Price', value: contract.exitPrice || 'Pending...', color: !contract.exitPrice && '#D4AF37' },
                             { label: 'Delivery Time', value: `${contract.duration} Seconds` },
-                            { label: 'Profit Rate', value: `${contract.profitRate}%`, color: 'var(--primary-gold)' },
+                            { label: 'Profit Rate', value: `${contract.profitRate}%`, color: '#D4AF37' },
                             { label: 'Opening Time', value: formatDateTime(contract.startTime) },
                             {
                                 label: 'Closing Time',
@@ -137,7 +137,7 @@ const ContractDetail = ({ contract, onClose }) => {
                             }}>
                                 <span style={{
                                     fontSize: '12px',
-                                    color: 'var(--text-muted)',
+                                    color: '#6b7280',
                                     fontWeight: '600',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px'
@@ -147,7 +147,7 @@ const ContractDetail = ({ contract, onClose }) => {
                                 <span style={{
                                     fontSize: '13px',
                                     fontWeight: '700',
-                                    color: item.color || 'var(--text-primary)',
+                                    color: item.color || '#ffffff',
                                     fontFamily: item.mono ? 'monospace' : 'inherit'
                                 }}>
                                     {item.value}
