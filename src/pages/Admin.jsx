@@ -22,6 +22,17 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import RejectionModal from '../components/RejectionModal';
 import { subscribeToAllTrades } from '../services/tradeService';
 import { subscribeToAllLoginHistory } from '../services/loginHistoryService';
+import { 
+    ResponsiveContainer, 
+    AreaChart, 
+    Area, 
+    XAxis, 
+    YAxis, 
+    CartesianGrid, 
+    Tooltip as RechartsTooltip, 
+    LineChart, 
+    Line 
+} from 'recharts';
 
 const TransactionManagement = ({ depositRequests, withdrawals, updateDepositStatus, updateWithdrawalStatus, setRejectionModal, closeRejectionModal }) => {
     const [activeTab, setActiveTab] = useState('deposits');
@@ -213,6 +224,7 @@ const TransactionManagement = ({ depositRequests, withdrawals, updateDepositStat
 const Admin = () => {
     // Auth State
     const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('adminAuth') === 'authenticated');
+    const [emailInput, setEmailInput] = useState(() => localStorage.getItem('adminEmail') || 'admin@aureliantrade.com');
     const [passwordInput, setPasswordInput] = useState('');
     const [authError, setAuthError] = useState('');
     const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -320,14 +332,41 @@ const Admin = () => {
         setAuthError('');
 
         try {
-            // Firebase authentication with admin email
-            const adminEmail = 'admin@aureliantrade.com';
+            // Firebase authentication with entered email
+            const adminEmail = emailInput;
+            localStorage.setItem('adminEmail', emailInput);
 
             // Attempt Firebase authentication
             await signInWithEmailAndPassword(auth, adminEmail, passwordInput);
 
-            console.log('Admin Authenticated Successfully');
+            console.log('Admin Authenticated Successfully with Firebase');
             sessionStorage.setItem('adminAuth', 'authenticated');
+            
+            // Success: Now attempt to get a backend token for API access
+            try {
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+                const backendResp = await fetch(`${apiUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: adminEmail, 
+                        password: passwordInput 
+                    })
+                });
+                
+                if (backendResp.ok) {
+                    const data = await backendResp.json();
+                    if (data.success && data.token) {
+                        localStorage.setItem('adminToken', data.token);
+                        console.log('Backend Admin Token acquired');
+                    }
+                } else {
+                    console.warn('Backend login failed, using limited frontend mode');
+                }
+            } catch (bErr) {
+                console.error('Backend connection failed:', bErr);
+            }
+
             setIsAuthenticated(true);
             setAuthError('');
         } catch (err) {
@@ -491,7 +530,7 @@ const Admin = () => {
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
                     setDepositSettings(prev => ({
                         ...prev,
-                        [`${prefix} Qr`]: compressedBase64
+                        [`${prefix}Qr`]: compressedBase64
                     }));
                 };
                 img.src = event.target.result;
@@ -855,18 +894,29 @@ const Admin = () => {
                         </div>
 
                         <form onSubmit={handleLogin} className="space-y-6">
-                            <div>
-                                <label className="block text-xs font-bold text-primary mb-2 tracking-tight">Access key</label>
-                                <div className="relative group">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-primary mb-2 tracking-tight uppercase">Email Address</label>
                                     <input
-                                        type="password"
-                                        value={passwordInput}
-                                        onChange={(e) => setPasswordInput(e.target.value)}
-                                        placeholder="Enter admin password"
+                                        type="email"
+                                        value={emailInput}
+                                        onChange={(e) => setEmailInput(e.target.value)}
+                                        placeholder="admin@example.com"
                                         className="w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-600 focus:border-primary/50 focus:bg-black/60 focus:ring-1 focus:ring-primary/50 transition-all outline-none"
-                                        autoFocus
                                     />
-                                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-10 pointer-events-none transition-opacity duration-500"></div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-primary mb-2 tracking-tight uppercase">Administrator Password</label>
+                                    <div className="relative group">
+                                        <input
+                                            type="password"
+                                            value={passwordInput}
+                                            onChange={(e) => setPasswordInput(e.target.value)}
+                                            placeholder="••••••••"
+                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-600 focus:border-primary/50 focus:bg-black/60 focus:ring-1 focus:ring-primary/50 transition-all outline-none"
+                                        />
+                                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-10 pointer-events-none transition-opacity duration-500"></div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -2300,8 +2350,8 @@ const Admin = () => {
                                                 <div className="relative">
                                                     <input 
                                                         type="text" 
-                                                        value={depositSettings[`${coin} Address`] || ''} 
-                                                        onChange={e => setDepositSettings({ ...depositSettings, [`${coin} Address`]: e.target.value })} 
+                                                        value={depositSettings[`${coin}Address`] || ''} 
+                                                        onChange={e => setDepositSettings({ ...depositSettings, [`${coin}Address`]: e.target.value })} 
                                                         className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:border-primary/50 outline-none transition-all pr-12 font-mono text-sm"
                                                         placeholder={`Enter ${coin.toUpperCase()} address`}
                                                     />
@@ -2327,18 +2377,18 @@ const Admin = () => {
                                                 </div>
                                             </div>
 
-                                            {depositSettings[`${coin} Qr`] && (
+                                            {depositSettings[`${coin}Qr`] && (
                                                 <div className="mt-4 relative group/qr">
                                                     <div className="absolute -top-2 -right-2 z-20">
                                                         <button 
-                                                            onClick={() => setDepositSettings({ ...depositSettings, [`${coin} Qr`]: '' })}
+                                                            onClick={() => setDepositSettings({ ...depositSettings, [`${coin}Qr`]: '' })}
                                                             className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                                                         >
                                                             <X size={16} />
                                                         </button>
                                                     </div>
                                                     <div className="bg-white p-3 rounded-2xl inline-block shadow-2xl relative">
-                                                        <img src={depositSettings[`${coin} Qr`]} alt={`${coin} QR`} className="w-full max-w-[150px] h-auto rounded-lg" />
+                                                        <img src={depositSettings[`${coin}Qr`]} alt={`${coin} QR`} className="w-full max-w-[150px] h-auto rounded-lg" />
                                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/qr:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
                                                             <span className="text-white text-[10px] font-bold uppercase">Change Image</span>
                                                         </div>
