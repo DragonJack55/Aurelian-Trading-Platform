@@ -2013,7 +2013,7 @@ const Admin = () => {
                     )}
 
                     {activeSection === 'chat' && (
-                        <div className="bg-[#0a0f1c]/80 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-[calc(100vh-180px)] relative group">
+                        <div className="bg-[#0a0f1c]/80 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row h-[70vh] md:h-[calc(100vh-180px)] min-h-[500px] relative group">
                             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
 
                             {/* Sidebar /Chat List */}
@@ -2090,7 +2090,7 @@ const Admin = () => {
                                         </div>
 
                                         {/* Messages */}
-                                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar overscroll-contain touch-pan-y">
                                             {conversations.find(c => c.userEmail === selectedUserId)?.messages?.map((msg, idx) => (
                                                 <div key={idx} className={`flex ${msg.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}>
                                                     <div className={`max-w-[70%] rounded-2xl p-4 shadow-sm relative group ${msg.direction === 'outbound'
