@@ -81,7 +81,7 @@ const DesktopNav = (props) => {
             }}>
                 <div style={{
                     width: '100%',
-                    maxWidth: '1280px',
+                    maxWidth: '1800px',
                     margin: '0 auto',
                     display: 'flex',
                     justifyContent: 'space-between',

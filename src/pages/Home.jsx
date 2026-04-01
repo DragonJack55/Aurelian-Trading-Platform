@@ -10,62 +10,12 @@ const Home = () => {
     const [activeTab, setActiveTab] = useState('crypto');
     const [marketAssets, setMarketAssets] = useState(assets);
 
-    // Sequential Typewriter animation
+    // Static text (animation removed)
     const content = {
         title1: 'Experience Premium',
         title2: 'Institutional Trading',
         desc: "Access deep liquidity, superior execution, and bank-grade security on the world's most sophisticated crypto trading platform."
     };
-
-    const [typed, setTyped] = useState({ t1: '', t2: '', d: '' });
-    const [activeCursor, setActiveCursor] = useState('t1'); // 't1', 't2', 'd', or null
-
-    useEffect(() => {
-        let isCancelled = false;
-
-        const runSequence = async () => {
-            if (isCancelled) return;
-
-            // Reset
-            setTyped({ t1: '', t2: '', d: '' });
-            setActiveCursor('t1');
-
-            // Type T1
-            for (let i = 0; i <= content.title1.length; i++) {
-                if (isCancelled) return;
-                setTyped(prev => ({ ...prev, t1: content.title1.slice(0, i) }));
-                await new Promise(r => setTimeout(r, 40));
-            }
-            setActiveCursor('t2');
-
-            // Type T2
-            for (let i = 0; i <= content.title2.length; i++) {
-                if (isCancelled) return;
-                setTyped(prev => ({ ...prev, t2: content.title2.slice(0, i) }));
-                await new Promise(r => setTimeout(r, 60));
-            }
-            setActiveCursor('d');
-
-            // Type Desc
-            for (let i = 0; i <= content.desc.length; i++) {
-                if (isCancelled) return;
-                setTyped(prev => ({ ...prev, d: content.desc.slice(0, i) }));
-                await new Promise(r => setTimeout(r, 15));
-            }
-            
-            // Blink cursor for 2 seconds then hide
-            await new Promise(r => setTimeout(r, 2000));
-            if (!isCancelled) setActiveCursor(null);
-        };
-
-        runSequence();
-        const mainInterval = setInterval(runSequence, 10000); // Repeat every 10 seconds
-
-        return () => {
-            isCancelled = true;
-            clearInterval(mainInterval);
-        };
-    }, [content.desc, content.title1, content.title2]);
 
     // Fetch initial accurate prices from Binance REST API
     useEffect(() => {
@@ -154,7 +104,7 @@ const Home = () => {
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 dark:bg-primary/20 rounded-full blur-[120px] opacity-50 dark:opacity-100 animate-pulse-slow"></div>
                 </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="relative z-10 max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16 fade-up visible">
                         {/* Left Column: Original Text Content */}
                         <div className="relative z-10 text-left mt-0 lg:mt-0 min-h-[220px] sm:min-h-[320px] lg:min-h-[480px]">
@@ -165,18 +115,15 @@ const Home = () => {
                                 </div>
                             </div>
                             <h1 className="text-[2rem] leading-tight sm:text-5xl lg:text-7xl xl:text-8xl font-display font-bold text-gray-900 dark:text-white mb-3 lg:mb-6 lg:leading-[0.95] tracking-tight">
-                                {typed.t1}
-                                {activeCursor === 't1' && <span className="inline-block w-[2px] lg:w-[4px] h-[1.8rem] sm:h-[2.8rem] lg:h-[4rem] bg-gray-900 dark:bg-white ml-1 animate-pulse align-middle rounded-sm"></span>}
+                                {content.title1}
                                 <br />
                                 <span className="text-[#D4AF37] drop-shadow-sm dark:drop-shadow-2xl">
-                                    {typed.t2}
-                                    {activeCursor === 't2' && <span className="inline-block w-[2px] lg:w-[4px] h-[1.8rem] sm:h-[2.8rem] lg:h-[4rem] bg-[#D4AF37] ml-1 animate-pulse align-middle rounded-sm"></span>}
+                                    {content.title2}
                                 </span>
                             </h1>
                             <div className="relative mb-6 lg:mb-10">
                                 <p className="text-gray-500 dark:text-text-muted max-w-2xl text-sm lg:text-lg font-light leading-relaxed mx-0 min-h-[3em]">
-                                    {typed.d}
-                                    {activeCursor === 'd' && <span className="inline-block w-[2px] lg:w-[3px] h-[1rem] lg:h-[1.4rem] bg-primary ml-1 animate-pulse align-middle rounded-sm"></span>}
+                                    {content.desc}
                                 </p>
                             </div>
 
@@ -482,7 +429,7 @@ const Home = () => {
             {/* Market Overview Section */}
             <section className="py-24 bg-background-base/50 relative">
                 <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
                         <div>
                             <h2 className="text-3xl md:text-4xl font-display font-bold text-gray-900 dark:text-white mb-2">Market Overview</h2>
@@ -563,7 +510,7 @@ const Home = () => {
             {/* Advanced Trading Section */}
             <section className="py-24 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 -skew-x-12 transform translate-x-20"></div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="flex flex-col lg:flex-row items-center gap-16">
                         <div className="lg:w-1/2">
                             <h2 className="text-3xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mb-6 leading-tight">
@@ -607,7 +554,7 @@ const Home = () => {
 
             {/* Why Choose Us */}
             <section className="py-24 relative overflow-hidden bg-background-dark">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-20 fade-up">
                         <h2 className="text-3xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mb-4">
                             Your Secure Partner for Digital Assets
@@ -635,7 +582,7 @@ const Home = () => {
 
             {/* Footer */}
             <footer className="bg-gray-100 dark:bg-[#05080F] border-t border-gray-200 dark:border-white/5 pt-20 pb-12 relative z-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
                         <div className="md:col-span-2">
                             <div className="flex items-center gap-3 mb-6">
