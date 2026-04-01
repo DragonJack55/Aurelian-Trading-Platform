@@ -274,6 +274,8 @@ const Admin = () => {
     const messagesEndRef = useRef(null);
     const [isSending, setIsSending] = useState(false);
     const [isRewriting, setIsRewriting] = useState(false);
+    const [isNewChatMode, setIsNewChatMode] = useState(false);
+    const [newChatSearch, setNewChatSearch] = useState('');
 
     // Pagination State
     const [lastUserDoc, setLastUserDoc] = useState(null);
@@ -2018,42 +2020,88 @@ const Admin = () => {
 
                             {/* Sidebar /Chat List */}
                             <div className={`${selectedUserId ? 'hidden md:block' : 'w-full'} md:w-80 border-r border-white/5 overflow-y-auto bg-black/20`}>
-                                <div className="p-4 border-b border-white/5 sticky top-0 bg-[#0a0f1c]/95 backdrop-blur-md z-10">
-                                    <h3 className="font-bold text-white text-sm uppercase tracking-wider">Conversations</h3>
-                                </div>
-                                {conversations.length === 0 && (
-                                    <div className="p-8 text-center">
-                                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-3">
-                                            <MessageCircle size={20} className="text-gray-500" />
-                                        </div>
-                                        <div className="text-gray-500 text-sm">No messages yet</div>
+                                <div className="p-4 border-b border-white/5 sticky top-0 bg-[#0a0f1c]/95 backdrop-blur-md z-10 flex flex-col gap-3">
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="font-bold text-white text-sm uppercase tracking-wider">Conversations</h3>
+                                        <button 
+                                            onClick={() => setIsNewChatMode(!isNewChatMode)}
+                                            className="p-1.5 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded transition-colors"
+                                            title="New Chat"
+                                        >
+                                            {isNewChatMode ? <X size={14} /> : <Plus size={14} />}
+                                        </button>
                                     </div>
-                                )}
-                                {conversations.map(conv => {
-                                    const unread = conv.unread || 0;
-                                    return (
+                                    {isNewChatMode && (
+                                        <div className="relative">
+                                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                                            <input 
+                                                type="text" 
+                                                placeholder="Search user..."
+                                                value={newChatSearch}
+                                                onChange={(e) => setNewChatSearch(e.target.value)}
+                                                className="w-full bg-black/40 border border-white/5 rounded-lg pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-primary/30 outline-none"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                                {isNewChatMode ? (
+                                    // New Chat mode: search through registered users
+                                    users.filter(u => u.role !== 'admin' && (u.email.toLowerCase().includes(newChatSearch.toLowerCase()) || (u.displayName && u.displayName.toLowerCase().includes(newChatSearch.toLowerCase())))).slice(0, 50).map(u => (
                                         <div
-                                            key={conv.userEmail}
-                                            onClick={() => setSelectedUserId(conv.userEmail)}
-                                            className={`p-4 border-b border-white/5 cursor-pointer flex gap-3 transition-all duration-200 ${selectedUserId === conv.userEmail ? 'bg-primary/10 border-l-4 border-l-primary' : 'hover:bg-white/5 border-l-4 border-l-transparent'}`}
+                                            key={u.email}
+                                            onClick={() => {
+                                                setSelectedUserId(u.email);
+                                                setIsNewChatMode(false);
+                                                setNewChatSearch('');
+                                            }}
+                                            className={`p-4 border-b border-white/5 cursor-pointer flex gap-3 transition-all duration-200 ${selectedUserId === u.email ? 'bg-primary/10 border-l-4 border-l-primary' : 'hover:bg-white/5 border-l-4 border-l-transparent'}`}
                                         >
                                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex-shrink-0 flex items-center justify-center text-white font-bold text-xs relative">
-                                                {(conv.userName || conv.userEmail).charAt(0).toUpperCase()}
-                                                {unread > 0 && <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#0a0f1c]"></span>}
+                                                {(u.displayName || u.email).charAt(0).toUpperCase()}
                                             </div>
-                                            <div className="overflow-hidden flex-1">
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <div className={`font-bold text-sm truncate ${selectedUserId === conv.userEmail ? 'text-primary' : 'text-gray-300'}`}>{conv.userName || conv.userEmail.split('@')[0]}</div>
-                                                    <span className="text-[10px] text-gray-500">{conv.timestamp ? formatTime(conv.timestamp) : ''}</span>
-                                                </div>
-                                                <div className="text-xs text-gray-500 truncate flex justify-between items-center">
-                                                    <span>{conv.lastMessage}</span>
-                                                    {unread > 0 && <span className="px-1.5 py-0.5 bg-primary text-black text-[9px] font-bold rounded-full">{unread}</span>}
-                                                </div>
+                                            <div className="overflow-hidden flex-1 flex flex-col justify-center">
+                                                <div className={`font-bold text-sm truncate ${selectedUserId === u.email ? 'text-primary' : 'text-gray-300'}`}>{u.displayName || u.email.split('@')[0]}</div>
+                                                <div className="text-xs text-gray-500 truncate">{u.email}</div>
                                             </div>
                                         </div>
-                                    );
-                                })}
+                                    ))
+                                ) : (
+                                    <>
+                                        {conversations.length === 0 && (
+                                            <div className="p-8 text-center">
+                                                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-3">
+                                                    <MessageCircle size={20} className="text-gray-500" />
+                                                </div>
+                                                <div className="text-gray-500 text-sm">No messages yet</div>
+                                            </div>
+                                        )}
+                                        {conversations.map(conv => {
+                                            const unread = conv.unread || 0;
+                                            return (
+                                                <div
+                                                    key={conv.userEmail}
+                                                    onClick={() => setSelectedUserId(conv.userEmail)}
+                                                    className={`p-4 border-b border-white/5 cursor-pointer flex gap-3 transition-all duration-200 ${selectedUserId === conv.userEmail ? 'bg-primary/10 border-l-4 border-l-primary' : 'hover:bg-white/5 border-l-4 border-l-transparent'}`}
+                                                >
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex-shrink-0 flex items-center justify-center text-white font-bold text-xs relative">
+                                                        {(conv.userName || conv.userEmail).charAt(0).toUpperCase()}
+                                                        {unread > 0 && <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#0a0f1c]"></span>}
+                                                    </div>
+                                                    <div className="overflow-hidden flex-1">
+                                                        <div className="flex justify-between items-center mb-1">
+                                                            <div className={`font-bold text-sm truncate ${selectedUserId === conv.userEmail ? 'text-primary' : 'text-gray-300'}`}>{conv.userName || conv.userEmail.split('@')[0]}</div>
+                                                            <span className="text-[10px] text-gray-500">{conv.timestamp ? formatTime(conv.timestamp) : ''}</span>
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 truncate flex justify-between items-center">
+                                                            <span>{conv.lastMessage}</span>
+                                                            {unread > 0 && <span className="px-1.5 py-0.5 bg-primary text-black text-[9px] font-bold rounded-full">{unread}</span>}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </>
+                                )}
                             </div>
 
                             {/* Chat Area */}
