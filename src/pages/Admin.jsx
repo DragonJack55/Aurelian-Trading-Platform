@@ -1089,7 +1089,7 @@ const Admin = () => {
                 {/* Background Glow */}
                 < div className="fixed top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" ></div >
 
-                <div className="w-full max-w-[1600px] mx-auto relative z-10 transition-all duration-500 animate-fade-in pb-20">
+                <div className="w-full relative z-10 transition-all duration-500 animate-fade-in pb-20">
                     {/* Header */}
                     <div className="mb-6 md:mb-10 flex flex-col md:flex-row md:justify-between md:items-end gap-6 text-left">
                         <div>
