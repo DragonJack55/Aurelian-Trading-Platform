@@ -74,19 +74,18 @@ const DesktopNav = (props) => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '0 40px',
+                padding: '0 20px',
                 borderBottom: '1px solid var(--glass-border)',
                 zIndex: 1000,
                 backdropFilter: 'blur(10px)'
             }}>
                 <div style={{
                     width: '100%',
-                    maxWidth: '1800px',
                     margin: '0 auto',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    padding: '0 20px'
+                    padding: '0 10px'
                 }}>
                     <img
                         src="/aurelian_header_logo_v3.png"

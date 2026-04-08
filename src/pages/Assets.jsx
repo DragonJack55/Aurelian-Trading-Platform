@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Eye, EyeOff, Shield, Wallet, Download, Headphones,
     ArrowDownCircle, ArrowLeftRight, RefreshCcw, Gift,
-    CreditCard, ChevronRight, Globe, Check
+    CreditCard, ChevronRight, Globe, Check, Lock, PhoneCall, AlertTriangle
 } from 'lucide-react';
 import WithdrawModal from '../components/WithdrawModal';
 import DepositModal from '../components/DepositModal';
@@ -188,19 +188,59 @@ const Assets = () => {
             {/* My Assets Card */}
             <div className="relative mb-6 group">
                 {/* Background & Clipping Container */}
-                <div className={`absolute inset-0 rounded-3xl overflow-hidden transition-all duration-300 ${user
-                    ? 'bg-gradient-gold shadow-gold-lg'
-                    : 'bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/10 shadow-lg'
+                <div className={`absolute inset-0 rounded-3xl overflow-hidden transition-all duration-300 ${
+                    user?.isFrozen
+                        ? 'bg-gradient-to-br from-blue-950 to-slate-900 shadow-lg border border-blue-500/30'
+                        : user
+                        ? 'bg-gradient-gold shadow-gold-lg'
+                        : 'bg-white dark:bg-surface-dark border border-gray-100 dark:border-white/10 shadow-lg'
                     }`}>
-                    {user && (
+                    {user && !user.isFrozen && (
                         /* Background Shine */
                         <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                    )}
+                    {user?.isFrozen && (
+                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMzYjgyZjYiIGZpbGwtb3BhY2l0eT0iMC4wNCI+PHBhdGggZD0iTTM2IDM0djZoLTZ2LTZoLTZ2LTZoNnYtNmg2djZoNnY2aC02eiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
                     )}
                 </div>
 
                 {/* Content Container (Allows Overflow) */}
-                <div className={`relative rounded-3xl transition-colors duration-300 ${user ? 'p-8 text-black' : 'p-6 text-gray-900 dark:text-white'}`}>
-                    {user ? (
+                <div className={`relative rounded-3xl transition-colors duration-300 ${user?.isFrozen ? 'p-8 text-white' : user ? 'p-8 text-black' : 'p-6 text-gray-900 dark:text-white'}`}>
+                    {user?.isFrozen ? (
+                        /* ---- FROZEN ASSETS BANNER ---- */
+                        <div className="relative z-10 flex flex-col items-center text-center py-2">
+                            <div className="w-16 h-16 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center mb-4 animate-pulse">
+                                <Lock size={28} className="text-blue-300" />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Assets Frozen</h3>
+                            <p className="text-blue-200 text-sm max-w-xs mb-6 leading-relaxed">
+                                Your assets have been temporarily frozen by the platform. To restore access, please contact our customer service team for further assistance.
+                            </p>
+                            <button
+                                onClick={() => setIsChatOpen(true)}
+                                className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-blue-500/30"
+                            >
+                                <PhoneCall size={16} />
+                                Contact Customer Service
+                            </button>
+
+                            {/* Disabled action buttons */}
+                            <div className="flex gap-2 mt-6 opacity-30 pointer-events-none">
+                                <div className="flex-1 bg-white/10 border border-white/10 py-3 px-6 rounded-2xl flex flex-col items-center gap-1">
+                                    <ArrowDownCircle size={20} />
+                                    <span className="text-[10px] font-bold">Deposit</span>
+                                </div>
+                                <div className="flex-1 bg-white/10 border border-white/10 py-3 px-6 rounded-2xl flex flex-col items-center gap-1">
+                                    <Wallet size={20} />
+                                    <span className="text-[10px] font-bold">Withdraw</span>
+                                </div>
+                                <div className="flex-1 bg-white/10 border border-white/10 py-3 px-6 rounded-2xl flex flex-col items-center gap-1">
+                                    <RefreshCcw size={20} />
+                                    <span className="text-[10px] font-bold">Exchange</span>
+                                </div>
+                            </div>
+                        </div>
+                    ) : user ? (
                         <>
                             <div className="relative z-10">
                                 <div className="flex items-center gap-2 mb-3 opacity-90">

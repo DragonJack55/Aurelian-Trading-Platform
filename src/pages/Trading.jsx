@@ -393,7 +393,7 @@ const Trading = () => {
             {isMenuOpen && <div onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1900]"></div>}
 
             {/* Top Bar for Chart Controls */}
-            <div className="sticky top-0 lg:top-[72px] px-3 lg:px-6 py-3 bg-background-base/80 backdrop-blur-md border-b border-border-light dark:border-border-subtle flex justify-between items-center shadow-lg z-30 overflow-hidden transition-all duration-300">
+            <div className="sticky top-0 lg:top-[80px] px-3 lg:px-6 py-3 bg-background-base/80 backdrop-blur-md border-b border-border-light dark:border-border-subtle flex justify-between items-center shadow-lg z-30 overflow-hidden transition-all duration-300">
                 <div className="flex items-center gap-3 lg:gap-6 min-w-0 flex-shrink">
                     <div className="flex items-center gap-2 lg:gap-4 cursor-pointer group min-w-0 flex-shrink" onClick={() => setIsMenuOpen(true)}>
                         <div className="p-1.5 lg:p-2 -ml-1 rounded-lg hover:bg-surface-light/10 transition-colors flex-shrink-0">
@@ -620,11 +620,11 @@ const Trading = () => {
                 </div>
 
                 {/* 3. Order Book Section - Tablet/Desktop Only */}
-                <div className="hidden xl:block w-[280px] bg-white dark:bg-surface-dark border-l border-gray-200 dark:border-border-gold/10 z-10">
-                    <div className="p-3 border-b border-gray-200 dark:border-white/5 font-bold text-xs text-text-subtle uppercase tracking-wider">
+                <div className="hidden xl:flex flex-col w-[280px] bg-white dark:bg-surface-dark border-l border-gray-200 dark:border-border-gold/10 z-10">
+                    <div className="p-3 border-b border-gray-200 dark:border-white/5 font-bold text-xs text-text-subtle uppercase tracking-wider shrink-0">
                         Order Book
                     </div>
-                    <div className="h-full">
+                    <div className="flex-1 min-h-0 overflow-hidden">
                         <OrderBook price={price.c} />
                     </div>
                 </div>

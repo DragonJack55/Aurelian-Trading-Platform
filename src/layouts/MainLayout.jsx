@@ -20,7 +20,7 @@ const MainLayout = () => {
             </div>
 
             {/* Main Content Area */}
-            <main className={`${isHomePage ? 'pt-0' : 'pt-4 lg:pt-24'} pb-24 lg:pb-0 min-h-screen w-full`}>
+            <main className={`${isHomePage ? 'pt-0' : (location.pathname === '/trade' || location.pathname === '/trading' ? 'pt-[60px] lg:pt-[80px]' : 'pt-4 lg:pt-24')} pb-24 lg:pb-0 min-h-screen w-full flex flex-col`}>
                 <Outlet />
             </main>
 

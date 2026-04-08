@@ -9,10 +9,10 @@ import {
     MoreHorizontal, LogOut, Settings, MessageCircle, Send, Plus, Trash2, Menu,
     LayoutDashboard, UserCheck, ShieldAlert, Ban, FileCheck, ShoppingCart, Circle,
     History, ScrollText, Download, Clock, CheckCircle, XCircle, List, Upload,
-    Headset, MessageSquare, Ticket, CheckSquare, BarChart, CandlestickChart, LogIn, Eye, EyeOff, ChevronLeft, ArrowDownToLine, ArrowUpFromLine, Minus, Key, Snowflake, Sparkles
+    Headset, MessageSquare, Ticket, CheckSquare, BarChart, CandlestickChart, LogIn, Eye, EyeOff, ChevronLeft, ArrowDownToLine, ArrowUpFromLine, Minus, Key, Snowflake, Sparkles, Star
 } from 'lucide-react';
 import { subscribeToConversations, sendMessage } from '../services/messageService';
-import { subscribeToAllUsers, updateUserPoints, updateUserTradeResult, getUsersPaginated, updateUserFreezeStatus, incrementUserPoints, resetUserPassword, markUserAsSeen } from '../services/userService';
+import { subscribeToAllUsers, updateUserPoints, updateUserTradeResult, getUsersPaginated, updateUserFreezeStatus, incrementUserPoints, resetUserPassword, markUserAsSeen, updateUserFavoriteStatus } from '../services/userService';
 import { updateVerificationStatus, getVerificationsPaginated, subscribeToAllVerifications } from '../services/verificationService';
 import { getDepositSettings, updateDepositSettings, updateDepositStatus, subscribeToAllDeposits } from '../services/depositService';
 import { updateWithdrawalStatus, getWithdrawalsPaginated, subscribeToAllWithdrawals } from '../services/withdrawalService';
@@ -746,9 +746,28 @@ const Admin = () => {
         if (!user) return;
 
         const newStatus = !user.isFrozen;
+        // Optimistic update
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, isFrozen: newStatus } : u));
         const result = await updateUserFreezeStatus(user.email, newStatus);
         if (!result.success) {
+            // Revert on failure
+            setUsers(prev => prev.map(u => u.id === userId ? { ...u, isFrozen: !newStatus } : u));
             alert('Failed to update freeze status: ' + result.error);
+        }
+    };
+
+    const handleToggleFavorite = async (userId) => {
+        const user = users.find(u => u.id === userId);
+        if (!user) return;
+
+        const newFav = !user.isFavorite;
+        // Optimistic update
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, isFavorite: newFav } : u));
+        const result = await updateUserFavoriteStatus(userId, newFav);
+        if (!result.success) {
+            // Revert on failure
+            setUsers(prev => prev.map(u => u.id === userId ? { ...u, isFavorite: !newFav } : u));
+            alert('Failed to update favorite status: ' + result.error);
         }
     };
 
@@ -1280,6 +1299,9 @@ const Admin = () => {
                                                             <div>
                                                                 <div className="font-bold text-white group-hover/row:text-primary transition-colors flex items-center gap-2">
                                                                     {user.full_name || user.name || 'Unknown User'}
+                                                                    {user.isFavorite && (
+                                                                        <Star size={13} className="text-yellow-400 fill-yellow-400 shrink-0" />
+                                                                    )}
                                                                     {user.adminHasSeen === false && (
                                                                         <button
                                                                             onClick={(e) => { e.stopPropagation(); handleMarkAsSeen(user.id); }}
@@ -1400,6 +1422,13 @@ const Admin = () => {
                                                     <td className="px-6 py-5 text-right">
                                                         <div className="flex justify-end gap-2">
                                                             <button
+                                                                onClick={() => handleToggleFavorite(user.id)}
+                                                                className={`p-2 rounded-lg transition-all duration-300 border ${user.isFavorite ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/30' : 'bg-white/5 text-gray-500 border-white/10 hover:text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-500/20'}`}
+                                                                title={user.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                                                            >
+                                                                <Star size={16} className={user.isFavorite ? 'fill-yellow-400' : ''} />
+                                                            </button>
+                                                            <button
                                                                 onClick={() => handleToggleFreeze(user.id, user.isFrozen)}
                                                                 className={`p-2 rounded-lg transition-all duration-300 border ${user.isFrozen ? 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-black' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10'}`}
                                                                 title={user.isFrozen ? "Unfreeze User" : "Freeze User"}
@@ -1441,6 +1470,7 @@ const Admin = () => {
                                                     <div>
                                                         <div className="font-bold text-white flex items-center gap-2">
                                                             {user.full_name || user.name || 'Unknown'}
+                                                            {user.isFavorite && <Star size={12} className="text-yellow-400 fill-yellow-400 shrink-0" />}
                                                             {user.adminHasSeen === false && <span className="px-1 py-0.5 bg-blue-500/20 text-blue-400 rounded text-[9px] font-bold">NEW</span>}
                                                         </div>
                                                         <div className="text-gray-500 text-[10px] break-all">{user.email}</div>
@@ -1481,6 +1511,7 @@ const Admin = () => {
                                                     <button onClick={() => updatePoints(user.id, 100)} className="px-2 py-1.5 bg-green-500/10 text-green-500 rounded text-[10px] font-bold border border-green-500/10">+100</button>
                                                 </div>
                                                 <div className="flex gap-2">
+                                                    <button onClick={() => handleToggleFavorite(user.id)} className={`p-2 rounded-lg border ${user.isFavorite ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-white/5 text-gray-500 border-white/10'}`} title={user.isFavorite ? 'Unfavorite' : 'Favorite'}><Star size={15} className={user.isFavorite ? 'fill-yellow-400' : ''} /></button>
                                                     <button onClick={() => handleToggleFreeze(user.id, user.isFrozen)} className={`p-2 rounded-lg border ${user.isFrozen ? 'bg-amber-500 text-black border-amber-500' : 'bg-white/5 text-gray-400 border-white/10'}`}><Ban size={16} /></button>
                                                     <button onClick={() => resetUserPassword(user.id)} className="p-2 bg-blue-500/10 text-blue-500 rounded-lg border border-blue-500/20"><RefreshCw size={16} /></button>
                                                     <button onClick={() => handleDeleteUser(user.id)} className="p-2 bg-red-500/10 text-red-400 rounded-lg border border-red-500/20"><Trash2 size={16} /></button>

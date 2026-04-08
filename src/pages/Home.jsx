@@ -105,6 +105,7 @@ const Home = () => {
                 </div>
 
                 <div className="relative z-10 max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16 fade-up visible">
                         {/* Left Column: Original Text Content */}
                         <div className="relative z-10 text-left mt-0 lg:mt-0 min-h-[220px] sm:min-h-[320px] lg:min-h-[480px]">

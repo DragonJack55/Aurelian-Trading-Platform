@@ -121,7 +121,32 @@ export const updateUserPoints = async (email, newPoints, currency = 'USDT') => {
 };
 
 export const updateUserFreezeStatus = async (email, isFrozen) => {
-    return updateUserStatus(email, isFrozen ? 'frozen' : 'active');
+    try {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("email", "==", email));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) throw new Error('User not found');
+        const userDoc = snapshot.docs[0];
+
+        await updateDoc(doc(db, "users", userDoc.id), {
+            status: isFrozen ? 'frozen' : 'active',
+            isFrozen: isFrozen
+        });
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+};
+
+export const updateUserFavoriteStatus = async (userId, isFavorite) => {
+    try {
+        await updateDoc(doc(db, "users", userId), { isFavorite });
+        return { success: true };
+    } catch (error) {
+        console.error('updateUserFavoriteStatus failed:', error.message);
+        return { success: false, error: error.message };
+    }
 };
 
 export const incrementUserPoints = async (email, amount, currency = 'USDT') => {

@@ -56,7 +56,7 @@ const Navbar = ({ isDarkMode, toggleTheme }) => {
             {/* Dark Mode Top Line Effect */}
             <div className="hidden dark:block absolute top-[env(safe-area-inset-top)] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-60"></div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16 dark:h-20 transition-all duration-300">
                     {/* Logo Area */}
                     <Link to="/" className="flex-shrink-0 flex items-center gap-2 sm:gap-3 dark:gap-4 cursor-pointer group relative">
