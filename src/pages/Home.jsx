@@ -152,7 +152,11 @@ const Home = () => {
                             <img
                                 src="/hero-new.jpg"
                                 alt="Trading Assets Preview"
-                                className="relative z-20 w-[140%] max-w-[140%] lg:w-[150%] lg:max-w-[150%] h-auto object-contain transform -translate-x-6 sm:-translate-x-12 translate-y-8 lg:translate-x-12 lg:-translate-y-8 mix-blend-lighten drop-shadow-2xl opacity-100 transition-transform duration-[2000ms] ease-out"
+                                style={{
+                                    WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 80%)',
+                                    maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 80%)'
+                                }}
+                                className="relative z-20 w-[140%] max-w-[140%] lg:w-[150%] lg:max-w-[150%] h-auto object-contain transform -translate-x-6 sm:-translate-x-12 translate-y-8 lg:translate-x-12 lg:-translate-y-8 mix-blend-lighten drop-shadow-2xl opacity-100 transition-transform duration-[2000ms] ease-out hover:scale-105"
                             />
                         </div>
                     </div>
