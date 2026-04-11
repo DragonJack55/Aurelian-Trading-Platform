@@ -329,7 +329,6 @@ const Admin = () => {
     // Handle password login
     const handleLogin = async (e) => {
         e.preventDefault();
-        console.log('Deployment ID: 2026-01-15_0240_FORCE_UPDATE');
         setIsLoggingIn(true);
         setAuthError('');
 
@@ -916,7 +915,6 @@ const Admin = () => {
                             </div>
                             <h1 className="text-2xl md:text-3xl font-bold text-white font-display tracking-wide mb-2">Admin Portal</h1>
                             <p className="text-gray-400 text-sm">Aurelian TD Trade Administration</p>
-                            <p className="text-xs text-amber-500 mt-1 font-mono">v2026-01-15 (Debug)</p>
                         </div>
 
                         <form onSubmit={handleLogin} className="space-y-6">
@@ -1085,7 +1083,7 @@ const Admin = () => {
 
                 {/* Footer User Profile */}
                 <div className="absolute bottom-0 left-0 w-full p-4 border-t border-white/5 bg-[#0a0f1c]/95 backdrop-blur-md">
-                    <p className="text-[10px] text-gray-600 font-mono opacity-50">v1.9</p>
+                    <p className="text-[10px] text-gray-600 font-mono opacity-50">v2.0</p>
                     <button
                         onClick={handleLogout}
                         className={`w-full py-3 ${isSidebarCollapsed ? 'px-2 justify-center' : 'px-4 justify-center gap-2'} bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 rounded-xl text-red-200 text-sm font-semibold flex items-center transition-all duration-300 group`}
