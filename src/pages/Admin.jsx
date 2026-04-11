@@ -820,11 +820,13 @@ const Admin = () => {
         }));
     };
 
+    const isAdminAccount = (u) => u.role === 'admin' || u.isAdmin === true || (u.email && u.email.toLowerCase().includes('admin'));
+    
     // KYC Unverified users are those whose verificationStatus is not 'verified' (e.g. 'unverified', 'pending', or not set yet)
-    const pendingUsers = users.filter(u => u.role !== 'admin' && u.verificationStatus !== 'verified');
+    const pendingUsers = users.filter(u => !isAdminAccount(u) && u.verificationStatus !== 'verified');
     // Broaden definition of 'approved'/active users to include anyone not pending/rejected
-    const approvedUsers = users.filter(u => u.role !== 'admin' && u.status !== 'pending' && u.status !== 'rejected');
-    const rejectedUsers = users.filter(u => u.status === 'rejected');
+    const approvedUsers = users.filter(u => !isAdminAccount(u) && u.status !== 'pending' && u.status !== 'rejected');
+    const rejectedUsers = users.filter(u => !isAdminAccount(u) && u.status === 'rejected');
     const pendingVerificationsCount = verifications.filter(v => v.verificationStatus === 'pending').length;
 
     // Sidebar Groups Configuration
@@ -1137,13 +1139,7 @@ const Admin = () => {
                                 {activeSection === 'allWithdrawals' && <><span className="w-2 h-8 bg-gray-400 rounded-full"></span> All Withdrawals</>}
                                 {activeSection === 'chat' && <><span className="w-2 h-8 bg-primary rounded-full"></span> Customer Support</>}
                             </h2>
-                            {/* Debug Info Overlay */}
-                            <div className="text-xs text-gray-500 mt-2 font-mono bg-black/20 p-2 rounded">
-                                Debug: Users={debugInfo.usersCount} | Auth={isAuthenticated ? 'Yes' : 'No'} |
-                                URL={import.meta.env.VITE_SUPABASE_URL?.slice(0, 20)}... |
-                                Err={debugInfo.error || 'None'}
-                            </div>
-                            <p className="text-gray-400 mt-2 text-xs md:text-sm ml-0 md:ml-5">Manage and monitor platform activity in real-time</p>
+                            <p className="text-gray-400 mt-2 text-xs md:text-sm">Manage and monitor platform activity in real-time</p>
                         </div>
 
                         {/* Quick Stats Summary */}
@@ -1436,7 +1432,7 @@ const Admin = () => {
                                                                 {user.isFrozen ? <CheckCircle size={18} /> : <Ban size={18} />}
                                                             </button>
                                                             <button
-                                                                onClick={() => resetUserPassword(user.id)}
+                                                                onClick={() => handleResetPassword(user.email)}
                                                                 className="p-2 bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white rounded-lg transition-all duration-300 border border-blue-500/20 hover:border-blue-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.4)]"
                                                                 title="Reset Password"
                                                             >
@@ -1686,12 +1682,7 @@ const Admin = () => {
                         </div>
                     )}
 
-                    {/* ACTIVE USERS (Previously 'approved') */}
-                    {(activeSection === 'activeUsers' || activeSection === 'approved') && (
-                        <div className="bg-[#0a0f1c]/80 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl relative group">
-                            {/* ... Reuse filtered user table ... */}
-                        </div>
-                    )}
+
 
                     {activeSection === 'depositRequests' && (
                         <div className="bg-[#0a0f1c]/80 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl relative group">
@@ -2928,38 +2919,53 @@ const Admin = () => {
                         </div>
                     )}
 
-                    {/* ── Banned Users ── */}
-                    {activeSection === 'banned' && (
+                    {/* ── Banned / Frozen Users ── */}
+                    {activeSection === 'banned' && (() => {
+                        const frozenUsers = users.filter(u => !isAdminAccount(u) && (u.isFrozen === true || u.status === 'banned'));
+                        return (
                         <div className="bg-[#0a0f1c]/80 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
                             <div className="p-6 border-b border-white/5 flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500"><Ban size={20} /></div>
-                                <h3 className="text-xl font-bold text-white">Banned Users</h3>
-                                <span className="ml-auto bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold px-3 py-1 rounded-full">{users.filter(u => u.status === 'banned' || u.status === 'frozen').length} Banned</span>
+                                <h3 className="text-xl font-bold text-white">Frozen / Banned Users</h3>
+                                <span className="ml-auto bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold px-3 py-1 rounded-full">{frozenUsers.length} Restricted</span>
                             </div>
-                            {users.filter(u => u.status === 'banned' || u.status === 'frozen').length === 0 ? (
+                            {frozenUsers.length === 0 ? (
                                 <div className="py-20 text-center text-gray-500">
                                     <CheckCircle size={40} className="text-green-500 mx-auto mb-4" />
-                                    <p className="text-white font-bold mb-2">No Banned Users</p>
+                                    <p className="text-white font-bold mb-2">No Restricted Users</p>
                                     <p className="text-sm">All users are in good standing.</p>
                                 </div>
                             ) : (
                                 <div className="divide-y divide-white/5">
-                                    {users.filter(u => u.status === 'banned' || u.status === 'frozen').map(user => (
-                                        <div key={user.id} className="px-6 py-4 flex items-center justify-between hover:bg-white/3 transition-colors">
-                                            <div>
-                                                <p className="font-bold text-white">{user.displayName || user.email}</p>
-                                                <p className="text-xs text-gray-500">{user.email}</p>
+                                    {frozenUsers.map(user => (
+                                        <div key={user.id} className="px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-bold border border-white/10 text-sm">
+                                                    {(user.full_name || user.email || '?').charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-white">{user.full_name || user.name || 'Unknown User'}</p>
+                                                    <p className="text-xs text-gray-500">{user.email}</p>
+                                                </div>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-red-500/10 text-red-400 border border-red-500/20">{user.status}</span>
-                                                <button onClick={() => updateUserFreezeStatus(user.email, false)} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-colors">Unban</button>
+                                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                                    <Snowflake size={11} /> Frozen
+                                                </span>
+                                                <button
+                                                    onClick={() => handleToggleFreeze(user.id)}
+                                                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-colors"
+                                                >
+                                                    Unfreeze
+                                                </button>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </div>
-                    )}
+                        );
+                    })()}
 
                     {/* ── Remaining legacy placeholders (not in screenshots) ── */}
                     {['approvedDeposits', 'rejectedDeposits', 'allDeposits', 'approvedWithdrawals', 'rejectedWithdrawals', 'allWithdrawals'].includes(activeSection) && (
