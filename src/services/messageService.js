@@ -194,25 +194,39 @@ export const subscribeToConversations = (callback) => {
 };
 
 export const markMessagesAsRead = async (userId) => {
+    if (!userId) {
+        console.warn('[markMessagesAsRead] No userId provided — skipping.');
+        return { success: false, error: 'No userId' };
+    }
+
     try {
         const messagesRef = collection(db, "messages");
+
+        // Use 2-field query only (user_id + direction) to avoid needing
+        // a Firestore composite index for the 3rd field (is_read).
+        // Filter is_read client-side instead.
         const qMsg = query(
             messagesRef,
             where("user_id", "==", userId),
-            where("direction", "==", "inbound"),
-            where("is_read", "==", false)
+            where("direction", "==", "inbound")
         );
 
         const msgSnapshot = await getDocs(qMsg);
 
-        const updatePromises = msgSnapshot.docs.map(doc =>
-            updateDoc(doc.ref, { is_read: true })
+        // Filter unread messages in JavaScript
+        const unreadDocs = msgSnapshot.docs.filter(d => d.data().is_read === false);
+
+        console.log(`[markMessagesAsRead] Found ${unreadDocs.length} unread messages for userId ${userId}`);
+
+        const updatePromises = unreadDocs.map(d =>
+            updateDoc(d.ref, { is_read: true })
         );
 
         await Promise.all(updatePromises);
+        console.log(`[markMessagesAsRead] ✅ Marked ${unreadDocs.length} messages as read`);
         return { success: true };
     } catch (error) {
-        console.error('Error marking messages as read:', error);
+        console.error('[markMessagesAsRead] ❌ Error:', error);
         return { success: false, error: error.message };
     }
 };
