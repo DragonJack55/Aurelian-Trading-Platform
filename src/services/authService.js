@@ -6,6 +6,8 @@ import {
     sendEmailVerification
 } from "firebase/auth";
 import { doc, setDoc, getDoc, collection, addDoc } from "firebase/firestore";
+import { notifyNewUserRegistered } from './telegramService';
+
 
 const formatError = (error) => {
     return error?.code ? error.code.replace('auth/', '').replace(/-/g, ' ') : error?.message || 'An unknown error occurred';
@@ -22,15 +24,17 @@ export const initiateRegistration = async (formData) => {
             displayName: formData.fullName,
             full_name: formData.fullName,
             role: 'client',
-            status: 'approved', // Set to approved so they appear in Active Users
-            verificationStatus: 'unverified', // Initially, they have not submitted identity docs
-            adminHasSeen: false, // Flag to show 'NEW' badge in Admin panel
-            password: formData.password,
+            status: 'approved',
+            verificationStatus: 'unverified',
+            adminHasSeen: false,
             points: 0,
             balance: 0,
             assets: 0,
             createdAt: new Date().toISOString()
         });
+
+        // Notify admin via Telegram (non-blocking)
+        notifyNewUserRegistered({ fullName: formData.fullName, email: formData.email });
 
         return {
             success: true,
@@ -80,7 +84,7 @@ export const loginAdmin = async (email, password) => {
 
         if (docSnap.exists()) {
             const userData = docSnap.data();
-            if (userData.role === 'admin' || email === 'durantedante62@gmail.com') {
+            if (userData.role === 'admin') {
                 return result;
             }
         }

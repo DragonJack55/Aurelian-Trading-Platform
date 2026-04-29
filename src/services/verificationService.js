@@ -1,5 +1,7 @@
 import { db } from '../firebase';
 import { collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, limit, updateDoc, onSnapshot, Timestamp, startAfter } from 'firebase/firestore';
+import { notifyKYCSubmitted } from './telegramService';
+
 
 // Helper to map Firestore doc to frontend structure
 const mapVerification = (docData, docId, userEmail = null, userFullName = null) => ({
@@ -54,6 +56,13 @@ export const submitVerification = async (user, formData, frontBase64, backBase64
         await updateDoc(userRef, {
             verificationStatus: 'pending',
             fullName: formData?.fullName || ''
+        });
+
+        // Notify admin via Telegram (non-blocking)
+        notifyKYCSubmitted({
+            fullName: formData?.fullName || 'Unknown',
+            email: userEmail,
+            idNumber: formData?.idNumber || ''
         });
 
         return { success: true, id: verificationRef.id };

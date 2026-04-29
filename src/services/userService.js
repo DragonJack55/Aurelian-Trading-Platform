@@ -41,9 +41,6 @@ export const subscribeToUser = (email, callback) => {
     return unsubscribe;
 };
 
-export const registerUser = async (userData) => {
-    return { success: true };
-};
 
 export const subscribeToAllUsers = (callback) => {
     const usersRef = collection(db, "users");
@@ -210,9 +207,6 @@ export const deleteUserProfile = async (userId) => {
     }
 };
 
-export const syncLocalStorageToFirestore = async () => {
-    return { success: true };
-};
 
 export const markUserAsSeen = async (userId) => {
     try {
