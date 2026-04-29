@@ -193,15 +193,8 @@ export const subscribeToConversations = (callback) => {
     };
 };
 
-export const markMessagesAsRead = async (userEmail) => {
+export const markMessagesAsRead = async (userId) => {
     try {
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, where("email", "==", userEmail));
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) return { success: false, error: 'User not found' };
-        const userId = snapshot.docs[0].id;
-
         const messagesRef = collection(db, "messages");
         const qMsg = query(
             messagesRef,

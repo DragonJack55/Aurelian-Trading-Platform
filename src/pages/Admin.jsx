@@ -2104,7 +2104,7 @@ const Admin = () => {
                                                     onClick={() => {
                                                         setSelectedUserId(conv.userEmail);
                                                         if (conv.unread > 0) {
-                                                            markMessagesAsRead(conv.userEmail);
+                                                            markMessagesAsRead(conv.userId);
                                                         }
                                                     }}
                                                     className={`p-4 border-b border-white/5 cursor-pointer flex gap-3 transition-all duration-200 ${selectedUserId === conv.userEmail ? 'bg-primary/10 border-l-4 border-l-primary' : 'hover:bg-white/5 border-l-4 border-l-transparent'}`}
@@ -2870,7 +2870,7 @@ const Admin = () => {
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {conversations.filter(c => c.unread > 0).map(conv => (
-                                        <div key={conv.userEmail} className="bg-[#131b2f]/80 border border-amber-500/20 rounded-2xl p-5 flex items-center gap-4 hover:border-amber-500/40 transition-all cursor-pointer" onClick={() => { setActiveSection('chat'); setSelectedUserId(conv.userEmail); markMessagesAsRead(conv.userEmail); }}>
+                                        <div key={conv.userEmail} className="bg-[#131b2f]/80 border border-amber-500/20 rounded-2xl p-5 flex items-center gap-4 hover:border-amber-500/40 transition-all cursor-pointer" onClick={() => { setActiveSection('chat'); setSelectedUserId(conv.userEmail); markMessagesAsRead(conv.userId); }}>
                                             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-lg">{(conv.userName || conv.userEmail || '?')[0].toUpperCase()}</div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between mb-1">
