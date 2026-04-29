@@ -11,8 +11,8 @@ import {
     History, ScrollText, Download, Clock, CheckCircle, XCircle, List, Upload,
     Headset, MessageSquare, Ticket, CheckSquare, BarChart, CandlestickChart, LogIn, Eye, EyeOff, ChevronLeft, ArrowDownToLine, ArrowUpFromLine, Minus, Key, Snowflake, Sparkles, Star
 } from 'lucide-react';
-import { subscribeToConversations, sendMessage } from '../services/messageService';
-import { subscribeToAllUsers, updateUserPoints, updateUserTradeResult, getUsersPaginated, updateUserFreezeStatus, incrementUserPoints, resetUserPassword, markUserAsSeen, updateUserFavoriteStatus } from '../services/userService';
+import { subscribeToConversations, sendMessage, markMessagesAsRead } from '../services/messageService';
+import { subscribeToAllUsers, updateUserPoints, updateUserTradeResult, getUsersPaginated, updateUserFreezeStatus, incrementUserPoints, resetUserPassword, markUserAsSeen, updateUserFavoriteStatus, deleteUserProfile } from '../services/userService';
 import { updateVerificationStatus, getVerificationsPaginated, subscribeToAllVerifications } from '../services/verificationService';
 import { getDepositSettings, updateDepositSettings, updateDepositStatus, subscribeToAllDeposits } from '../services/depositService';
 import { updateWithdrawalStatus, getWithdrawalsPaginated, subscribeToAllWithdrawals } from '../services/withdrawalService';
@@ -22,28 +22,28 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import RejectionModal from '../components/RejectionModal';
 import { subscribeToAllTrades } from '../services/tradeService';
 import { subscribeToAllLoginHistory } from '../services/loginHistoryService';
-import { 
-    ResponsiveContainer, 
-    AreaChart, 
-    Area, 
-    XAxis, 
-    YAxis, 
-    CartesianGrid, 
-    Tooltip as RechartsTooltip, 
-    LineChart, 
-    Line 
+import {
+    ResponsiveContainer,
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip as RechartsTooltip,
+    LineChart,
+    Line
 } from 'recharts';
 
 const TransactionManagement = ({ depositRequests, withdrawals, updateDepositStatus, updateWithdrawalStatus, setRejectionModal, closeRejectionModal }) => {
     const [activeTab, setActiveTab] = useState('deposits');
     const [searchQuery, setSearchQuery] = useState('');
 
-    const filteredDeposits = (depositRequests || []).filter(d => 
+    const filteredDeposits = (depositRequests || []).filter(d =>
         (d.email || d.userEmail || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (d.hash || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const filteredWithdrawals = (withdrawals || []).filter(w => 
+    const filteredWithdrawals = (withdrawals || []).filter(w =>
         (w.email || w.userEmail || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (w.walletAddress || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -52,24 +52,24 @@ const TransactionManagement = ({ depositRequests, withdrawals, updateDepositStat
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div className="flex bg-white/5 p-1 rounded-xl w-fit">
-                    <button 
+                    <button
                         onClick={() => setActiveTab('deposits')}
                         className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'deposits' ? 'bg-primary text-black' : 'text-gray-400 hover:text-white'}`}
                     >
                         Deposits
                     </button>
-                    <button 
+                    <button
                         onClick={() => setActiveTab('withdrawals')}
                         className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'withdrawals' ? 'bg-primary text-black' : 'text-gray-400 hover:text-white'}`}
                     >
                         Withdrawals
                     </button>
                 </div>
-                
+
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         placeholder="Search by email or address..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -86,15 +86,14 @@ const TransactionManagement = ({ depositRequests, withdrawals, updateDepositStat
                                 <div className="p-3 bg-green-500/10 rounded-2xl">
                                     <ArrowDownLeft className="text-green-500" size={24} />
                                 </div>
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                                    deposit.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${deposit.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
                                     deposit.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                    'bg-red-500/10 text-red-500 border-red-500/20'
-                                }`}>
+                                        'bg-red-500/10 text-red-500 border-red-500/20'
+                                    }`}>
                                     {deposit.status}
                                 </span>
                             </div>
-                            
+
                             <div className="space-y-4">
                                 <div>
                                     <h4 className="text-sm font-bold text-gray-400 mb-1 font-sans">User email</h4>
@@ -116,13 +115,13 @@ const TransactionManagement = ({ depositRequests, withdrawals, updateDepositStat
                                 </div>
                                 {deposit.status === 'pending' && (
                                     <div className="flex gap-3 pt-2">
-                                        <button 
+                                        <button
                                             onClick={() => updateDepositStatus(deposit.id, 'approved')}
                                             className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-600/20"
                                         >
                                             APPROVE
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 setRejectionModal({
                                                     isOpen: true,
@@ -155,15 +154,14 @@ const TransactionManagement = ({ depositRequests, withdrawals, updateDepositStat
                                 <div className="p-3 bg-amber-500/10 rounded-2xl">
                                     <ArrowUpRight className="text-amber-500" size={24} />
                                 </div>
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                                    withdrawal.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${withdrawal.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
                                     withdrawal.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                    'bg-red-500/10 text-red-500 border-red-500/20'
-                                }`}>
+                                        'bg-red-500/10 text-red-500 border-red-500/20'
+                                    }`}>
                                     {withdrawal.status}
                                 </span>
                             </div>
-                            
+
                             <div className="space-y-4">
                                 <div>
                                     <h4 className="text-sm font-bold text-gray-400 mb-1 font-sans">User email</h4>
@@ -185,13 +183,13 @@ const TransactionManagement = ({ depositRequests, withdrawals, updateDepositStat
                                 </div>
                                 {withdrawal.status === 'pending' && (
                                     <div className="flex gap-3 pt-2">
-                                        <button 
+                                        <button
                                             onClick={() => updateWithdrawalStatus(withdrawal.id, 'approved')}
                                             className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-600/20"
                                         >
                                             APPROVE
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 setRejectionModal({
                                                     isOpen: true,
@@ -342,19 +340,19 @@ const Admin = () => {
 
             console.log('Admin Authenticated Successfully with Firebase');
             sessionStorage.setItem('adminAuth', 'authenticated');
-            
+
             // Success: Now attempt to get a backend token for API access
             try {
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
                 const backendResp = await fetch(`${apiUrl}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        email: adminEmail, 
-                        password: passwordInput 
+                    body: JSON.stringify({
+                        email: adminEmail,
+                        password: passwordInput
                     })
                 });
-                
+
                 if (backendResp.ok) {
                     const data = await backendResp.json();
                     if (data.success && data.token) {
@@ -615,7 +613,7 @@ const Admin = () => {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
             const resp = await fetch(`${apiUrl}/admin/rewrite`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
                 },
@@ -681,8 +679,6 @@ const Admin = () => {
             type: 'danger',
             confirmText: 'Delete Permanently',
             onConfirm: async () => {
-                // Import deleteUserProfile dynamically or assume it's imported at top
-                const { deleteUserProfile } = await import('../services/userService');
                 const result = await deleteUserProfile(userId);
 
                 if (result.success) {
@@ -820,13 +816,16 @@ const Admin = () => {
     };
 
     const isAdminAccount = (u) => u.role === 'admin' || u.isAdmin === true || (u.email && u.email.toLowerCase().includes('admin'));
-    
+
     // KYC Unverified users are those whose verificationStatus is not 'verified' (e.g. 'unverified', 'pending', or not set yet)
     const pendingUsers = users.filter(u => !isAdminAccount(u) && u.verificationStatus !== 'verified');
     // Broaden definition of 'approved'/active users to include anyone not pending/rejected
     const approvedUsers = users.filter(u => !isAdminAccount(u) && u.status !== 'pending' && u.status !== 'rejected');
     const rejectedUsers = users.filter(u => !isAdminAccount(u) && u.status === 'rejected');
     const pendingVerificationsCount = verifications.filter(v => v.verificationStatus === 'pending').length;
+    const unreadTicketsCount = conversations.filter(c => c.unread > 0).length;
+    const pendingDepositsCount = depositRequests.filter(d => d.status === 'pending').length;
+    const pendingWithdrawalsCount = withdrawals.filter(w => w.status === 'pending').length;
 
     // Sidebar Groups Configuration
     const sidebarGroups = [
@@ -1056,8 +1055,10 @@ const Admin = () => {
                                                         <span className={`w-1.5 h-1.5 rounded-full absolute left-3 transition-colors ${activeSection === sub.id ? 'bg-primary shadow-[0_0_8px_rgba(212,175,55,0.6)]' : 'bg-gray-700'} `}></span>
                                                         {sub.label}
                                                         {sub.id === 'pending' && pendingUsers.length > 0 && <span className="ml-auto px-1.5 py-0.5 bg-amber-500 text-black text-[9px] font-bold rounded-full">{pendingUsers.length}</span>}
-                                                        {sub.id === 'depositRequests' && depositRequests.length > 0 && <span className="ml-auto px-1.5 py-0.5 bg-green-500 text-black text-[9px] font-bold rounded-full">{depositRequests.length}</span>}
+                                                        {sub.id === 'depositRequests' && pendingDepositsCount > 0 && <span className="ml-auto px-1.5 py-0.5 bg-green-500 text-black text-[9px] font-bold rounded-full">{pendingDepositsCount}</span>}
+                                                        {sub.id === 'withdrawals' && pendingWithdrawalsCount > 0 && <span className="ml-auto px-1.5 py-0.5 bg-amber-500 text-black text-[9px] font-bold rounded-full">{pendingWithdrawalsCount}</span>}
                                                         {sub.id === 'verifications' && pendingVerificationsCount > 0 && <span className="ml-auto px-1.5 py-0.5 bg-blue-500 text-black text-[9px] font-bold rounded-full">{pendingVerificationsCount}</span>}
+                                                        {sub.id === 'tickets' && unreadTicketsCount > 0 && <span className="ml-auto px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full">{unreadTicketsCount}</span>}
                                                     </button>
                                                 ))}
                                             </div>
@@ -1066,7 +1067,7 @@ const Admin = () => {
                                 </>
                             ) : (
                                 <button
-                                    onClick={() => { if(group.action) group.action(); setIsSidebarOpen(false); }}
+                                    onClick={() => { if (group.action) group.action(); setIsSidebarOpen(false); }}
                                     className={`w-full flex items-center ${isSidebarCollapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3'} rounded-xl transition-all duration-300 group ${activeSection === group.id
                                         ? 'bg-gradient-to-r from-primary/20 to-transparent text-primary border-l-2 border-primary'
                                         : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -1270,249 +1271,249 @@ const Admin = () => {
                                 </div>
                             ) : (
                                 <>
-                                <div className="hidden md:block overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-white/5 border-b border-white/5">
-                                            <tr>
-                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">User Details</th>
-                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Credentials</th>
-                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Balance</th>
-                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Win Rate</th>
-                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                                                <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-white/5">
-                                            {approvedUsers.map(user => (
-                                                <tr key={user.id} className="hover:bg-white/5 transition-colors group/row">
-                                                    <td className="px-6 py-5">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-bold border border-white/10">
-                                                                {(user.full_name && user.full_name.length > 0 ? user.full_name : (user.email || '?')).charAt(0).toUpperCase()}
-                                                            </div>
-                                                            <div>
-                                                                <div className="font-bold text-white group-hover/row:text-primary transition-colors flex items-center gap-2">
-                                                                    {user.full_name || user.name || 'Unknown User'}
-                                                                    {user.isFavorite && (
-                                                                        <Star size={13} className="text-yellow-400 fill-yellow-400 shrink-0" />
-                                                                    )}
-                                                                    {user.adminHasSeen === false && (
-                                                                        <button
-                                                                            onClick={(e) => { e.stopPropagation(); handleMarkAsSeen(user.id); }}
-                                                                            className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded text-[9px] font-bold uppercase tracking-wider animate-pulse hover:bg-blue-500/40 transition-colors"
-                                                                            title="Click to dismiss 'NEW' label"
-                                                                        >
-                                                                            NEW
-                                                                        </button>
-                                                                    )}
+                                    <div className="hidden md:block overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-white/5 border-b border-white/5">
+                                                <tr>
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">User Details</th>
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Credentials</th>
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Balance</th>
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Win Rate</th>
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                                                    <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-white/5">
+                                                {approvedUsers.map(user => (
+                                                    <tr key={user.id} className="hover:bg-white/5 transition-colors group/row">
+                                                        <td className="px-6 py-5">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-bold border border-white/10">
+                                                                    {(user.full_name && user.full_name.length > 0 ? user.full_name : (user.email || '?')).charAt(0).toUpperCase()}
                                                                 </div>
-                                                                <div className="text-gray-500 text-xs mt-0.5">{user.email}</div>
+                                                                <div>
+                                                                    <div className="font-bold text-white group-hover/row:text-primary transition-colors flex items-center gap-2">
+                                                                        {user.full_name || user.name || 'Unknown User'}
+                                                                        {user.isFavorite && (
+                                                                            <Star size={13} className="text-yellow-400 fill-yellow-400 shrink-0" />
+                                                                        )}
+                                                                        {user.adminHasSeen === false && (
+                                                                            <button
+                                                                                onClick={(e) => { e.stopPropagation(); handleMarkAsSeen(user.id); }}
+                                                                                className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded text-[9px] font-bold uppercase tracking-wider animate-pulse hover:bg-blue-500/40 transition-colors"
+                                                                                title="Click to dismiss 'NEW' label"
+                                                                            >
+                                                                                NEW
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="text-gray-500 text-xs mt-0.5">{user.email}</div>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-5">
-                                                        <div className="space-y-1">
-                                                            <div className="flex items-center gap-2 text-xs">
-                                                                <span className="text-gray-500 w-16">Password:</span>
-                                                                <span className="font-mono text-gray-500 bg-white/5 px-2 py-0.5 rounded border border-white/5 text-[10px]">
-                                                                    ••••••••
-                                                                </span>
-                                                                <span className="text-gray-600 text-[9px]">(encrypted)</span>
-                                                            </div>
-                                                            {user.withdrawPassword && (
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <div className="space-y-1">
                                                                 <div className="flex items-center gap-2 text-xs">
-                                                                    <span className="text-gray-500 w-16">W-Pass:</span>
-                                                                    <span className="font-mono text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{user.withdrawPassword}</span>
+                                                                    <span className="text-gray-500 w-16">Password:</span>
+                                                                    <span className="font-mono text-gray-500 bg-white/5 px-2 py-0.5 rounded border border-white/5 text-[10px]">
+                                                                        ••••••••
+                                                                    </span>
+                                                                    <span className="text-gray-600 text-[9px]">(encrypted)</span>
                                                                 </div>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-5">
-                                                        <div className="flex flex-col gap-2 bg-black/30 p-2 rounded-xl w-fit border border-white/5">
-                                                            <div className="flex gap-4 mb-1">
-                                                                <div className="text-xs">
-                                                                    <span className="text-gray-500">USDT:</span> <span className="text-white font-bold font-mono">${user.balance?.toLocaleString() || '0'}</span>
-                                                                </div>
-                                                                {(user.btcBalance > 0) && (
-                                                                    <div className="text-xs">
-                                                                        <span className="text-gray-500">BTC:</span> <span className="text-white font-bold font-mono">{user.btcBalance}</span>
-                                                                    </div>
-                                                                )}
-                                                                {(user.ethBalance > 0) && (
-                                                                    <div className="text-xs">
-                                                                        <span className="text-gray-500">ETH:</span> <span className="text-white font-bold font-mono">{user.ethBalance}</span>
+                                                                {user.withdrawPassword && (
+                                                                    <div className="flex items-center gap-2 text-xs">
+                                                                        <span className="text-gray-500 w-16">W-Pass:</span>
+                                                                        <span className="font-mono text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{user.withdrawPassword}</span>
                                                                     </div>
                                                                 )}
                                                             </div>
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <div className="flex flex-col gap-2 bg-black/30 p-2 rounded-xl w-fit border border-white/5">
+                                                                <div className="flex gap-4 mb-1">
+                                                                    <div className="text-xs">
+                                                                        <span className="text-gray-500">USDT:</span> <span className="text-white font-bold font-mono">${user.balance?.toLocaleString() || '0'}</span>
+                                                                    </div>
+                                                                    {(user.btcBalance > 0) && (
+                                                                        <div className="text-xs">
+                                                                            <span className="text-gray-500">BTC:</span> <span className="text-white font-bold font-mono">{user.btcBalance}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {(user.ethBalance > 0) && (
+                                                                        <div className="text-xs">
+                                                                            <span className="text-gray-500">ETH:</span> <span className="text-white font-bold font-mono">{user.ethBalance}</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
 
-                                                            <div className="flex items-center gap-1">
+                                                                <div className="flex items-center gap-1">
+                                                                    <button
+                                                                        onClick={() => updatePoints(user.id, -100)}
+                                                                        className="px-2 py-1 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-xs font-bold rounded transition-all border border-red-500/20"
+                                                                        title="Subtract $100"
+                                                                    >
+                                                                        -100
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => updatePoints(user.id, 100)}
+                                                                        className="px-2 py-1 bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white text-xs font-bold rounded transition-all border border-green-500/20"
+                                                                        title="Add $100"
+                                                                    >
+                                                                        +100
+                                                                    </button>
+
+                                                                    <select
+                                                                        value={pointsCurrency[user.id] || 'USDT'}
+                                                                        onChange={(e) => setPointsCurrency({ ...pointsCurrency, [user.id]: e.target.value })}
+                                                                        className="w-16 px-1 py-1 bg-white/5 border border-white/10 rounded text-white text-[10px] font-bold outline-none focus:border-primary/50 ml-1"
+                                                                    >
+                                                                        <option value="USDT">USDT</option>
+                                                                        <option value="BTC">BTC</option>
+                                                                        <option value="ETH">ETH</option>
+                                                                    </select>
+
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="Amount"
+                                                                        value={pointsInput[user.id] || ''}
+                                                                        onChange={(e) => setPointsInput({ ...pointsInput, [user.id]: e.target.value })}
+                                                                        className="w-20 px-2 py-1 bg-white/5 border border-white/10 rounded text-white text-xs focus:border-primary/50 focus:outline-none"
+                                                                    />
+                                                                    <button
+                                                                        onClick={() => setCustomPoints(user.id)}
+                                                                        className="px-2 py-1 bg-primary/10 hover:bg-primary text-primary hover:text-black text-xs font-bold rounded transition-all border border-primary/20"
+                                                                        title="Set Custom Balance"
+                                                                    >
+                                                                        Set
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <div className="flex gap-1 bg-black/30 p-1 rounded-lg w-fit border border-white/5">
+                                                                {['win', 'loss'].map(type => (
+                                                                    <button
+                                                                        key={type}
+                                                                        onClick={() => updateWinRate(user.email, type)}
+                                                                        className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all duration-300 ${winRates[user.email] === type || user.trade_result === type
+                                                                            ? (type === 'win' ? 'bg-green-500 text-black shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.3)]')
+                                                                            : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                                                                            }`}
+                                                                    >
+                                                                        {type}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                                                Active
+                                                            </span>
+                                                            <div className="text-[10px] text-gray-500 mt-2">
+                                                                {user.registeredAt}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-5 text-right">
+                                                            <div className="flex justify-end gap-2">
                                                                 <button
-                                                                    onClick={() => updatePoints(user.id, -100)}
-                                                                    className="px-2 py-1 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-xs font-bold rounded transition-all border border-red-500/20"
-                                                                    title="Subtract $100"
+                                                                    onClick={() => handleToggleFavorite(user.id)}
+                                                                    className={`p-2 rounded-lg transition-all duration-300 border ${user.isFavorite ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/30' : 'bg-white/5 text-gray-500 border-white/10 hover:text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-500/20'}`}
+                                                                    title={user.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                                                                 >
-                                                                    -100
+                                                                    <Star size={16} className={user.isFavorite ? 'fill-yellow-400' : ''} />
                                                                 </button>
                                                                 <button
-                                                                    onClick={() => updatePoints(user.id, 100)}
-                                                                    className="px-2 py-1 bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white text-xs font-bold rounded transition-all border border-green-500/20"
-                                                                    title="Add $100"
+                                                                    onClick={() => handleToggleFreeze(user.id, user.isFrozen)}
+                                                                    className={`p-2 rounded-lg transition-all duration-300 border ${user.isFrozen ? 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-black' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10'}`}
+                                                                    title={user.isFrozen ? "Unfreeze User" : "Freeze User"}
                                                                 >
-                                                                    +100
+                                                                    {user.isFrozen ? <CheckCircle size={18} /> : <Ban size={18} />}
                                                                 </button>
-                                                                
-                                                                <select
-                                                                    value={pointsCurrency[user.id] || 'USDT'}
-                                                                    onChange={(e) => setPointsCurrency({ ...pointsCurrency, [user.id]: e.target.value })}
-                                                                    className="w-16 px-1 py-1 bg-white/5 border border-white/10 rounded text-white text-[10px] font-bold outline-none focus:border-primary/50 ml-1"
-                                                                >
-                                                                    <option value="USDT">USDT</option>
-                                                                    <option value="BTC">BTC</option>
-                                                                    <option value="ETH">ETH</option>
-                                                                </select>
-
-                                                                <input
-                                                                    type="number"
-                                                                    placeholder="Amount"
-                                                                    value={pointsInput[user.id] || ''}
-                                                                    onChange={(e) => setPointsInput({ ...pointsInput, [user.id]: e.target.value })}
-                                                                    className="w-20 px-2 py-1 bg-white/5 border border-white/10 rounded text-white text-xs focus:border-primary/50 focus:outline-none"
-                                                                />
                                                                 <button
-                                                                    onClick={() => setCustomPoints(user.id)}
-                                                                    className="px-2 py-1 bg-primary/10 hover:bg-primary text-primary hover:text-black text-xs font-bold rounded transition-all border border-primary/20"
-                                                                    title="Set Custom Balance"
+                                                                    onClick={() => handleResetPassword(user.email)}
+                                                                    className="p-2 bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white rounded-lg transition-all duration-300 border border-blue-500/20 hover:border-blue-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.4)]"
+                                                                    title="Reset Password"
                                                                 >
-                                                                    Set
+                                                                    <RefreshCw size={18} />
+                                                                </button>
+                                                                <div className="w-px h-8 bg-white/10 mx-1"></div>
+                                                                <button
+                                                                    onClick={() => handleDeleteUser(user.id)}
+                                                                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
+                                                                    title="Delete User"
+                                                                >
+                                                                    <Trash2 size={18} />
                                                                 </button>
                                                             </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Mobile User Cards View */}
+                                    <div className="md:hidden divide-y divide-white/5">
+                                        {approvedUsers.map(user => (
+                                            <div key={user.id} className="p-4 space-y-4 hover:bg-white/5 transition-colors">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-bold border border-white/10">
+                                                            {(user.full_name && user.full_name.length > 0 ? user.full_name : (user.email || '?')).charAt(0).toUpperCase()}
                                                         </div>
-                                                    </td>
-                                                    <td className="px-6 py-5">
-                                                        <div className="flex gap-1 bg-black/30 p-1 rounded-lg w-fit border border-white/5">
+                                                        <div>
+                                                            <div className="font-bold text-white flex items-center gap-2">
+                                                                {user.full_name || user.name || 'Unknown'}
+                                                                {user.isFavorite && <Star size={12} className="text-yellow-400 fill-yellow-400 shrink-0" />}
+                                                                {user.adminHasSeen === false && <span className="px-1 py-0.5 bg-blue-500/20 text-blue-400 rounded text-[9px] font-bold">NEW</span>}
+                                                            </div>
+                                                            <div className="text-gray-500 text-[10px] break-all">{user.email}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-col items-end gap-1">
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-500 border border-green-500/20">Active</span>
+                                                        <div className="text-[9px] text-gray-600">{user.registeredAt}</div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4 bg-black/20 p-3 rounded-xl border border-white/5">
+                                                    <div>
+                                                        <div className="text-[9px] text-gray-500 uppercase font-bold tracking-wider mb-1">Balance</div>
+                                                        <div className="text-lg font-bold text-primary font-mono">${user.balance?.toLocaleString() || '0'}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[9px] text-gray-500 uppercase font-bold tracking-wider mb-1">Trade Result</div>
+                                                        <div className="flex gap-1">
                                                             {['win', 'loss'].map(type => (
                                                                 <button
                                                                     key={type}
                                                                     onClick={() => updateWinRate(user.email, type)}
-                                                                    className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all duration-300 ${winRates[user.email] === type || user.trade_result === type
-                                                                        ? (type === 'win' ? 'bg-green-500 text-black shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.3)]')
-                                                                        : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
-                                                                        }`}
+                                                                    className={`flex-1 py-1 rounded text-[9px] font-bold uppercase ${winRates[user.email] === type || user.trade_result === type
+                                                                        ? (type === 'win' ? 'bg-green-500 text-black' : 'bg-red-500 text-white')
+                                                                        : 'bg-white/5 text-gray-500'}`}
                                                                 >
                                                                     {type}
                                                                 </button>
                                                             ))}
                                                         </div>
-                                                    </td>
-                                                    <td className="px-6 py-5">
-                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                                            Active
-                                                        </span>
-                                                        <div className="text-[10px] text-gray-500 mt-2">
-                                                            {user.registeredAt}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-5 text-right">
-                                                        <div className="flex justify-end gap-2">
-                                                            <button
-                                                                onClick={() => handleToggleFavorite(user.id)}
-                                                                className={`p-2 rounded-lg transition-all duration-300 border ${user.isFavorite ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/30' : 'bg-white/5 text-gray-500 border-white/10 hover:text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-500/20'}`}
-                                                                title={user.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                                                            >
-                                                                <Star size={16} className={user.isFavorite ? 'fill-yellow-400' : ''} />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleToggleFreeze(user.id, user.isFrozen)}
-                                                                className={`p-2 rounded-lg transition-all duration-300 border ${user.isFrozen ? 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-black' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10'}`}
-                                                                title={user.isFrozen ? "Unfreeze User" : "Freeze User"}
-                                                            >
-                                                                {user.isFrozen ? <CheckCircle size={18} /> : <Ban size={18} />}
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleResetPassword(user.email)}
-                                                                className="p-2 bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white rounded-lg transition-all duration-300 border border-blue-500/20 hover:border-blue-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.4)]"
-                                                                title="Reset Password"
-                                                            >
-                                                                <RefreshCw size={18} />
-                                                            </button>
-                                                            <div className="w-px h-8 bg-white/10 mx-1"></div>
-                                                            <button
-                                                                onClick={() => handleDeleteUser(user.id)}
-                                                                className="p-2 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
-                                                                title="Delete User"
-                                                            >
-                                                                <Trash2 size={18} />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                {/* Mobile User Cards View */}
-                                <div className="md:hidden divide-y divide-white/5">
-                                    {approvedUsers.map(user => (
-                                        <div key={user.id} className="p-4 space-y-4 hover:bg-white/5 transition-colors">
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-bold border border-white/10">
-                                                        {(user.full_name && user.full_name.length > 0 ? user.full_name : (user.email || '?')).charAt(0).toUpperCase()}
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-bold text-white flex items-center gap-2">
-                                                            {user.full_name || user.name || 'Unknown'}
-                                                            {user.isFavorite && <Star size={12} className="text-yellow-400 fill-yellow-400 shrink-0" />}
-                                                            {user.adminHasSeen === false && <span className="px-1 py-0.5 bg-blue-500/20 text-blue-400 rounded text-[9px] font-bold">NEW</span>}
-                                                        </div>
-                                                        <div className="text-gray-500 text-[10px] break-all">{user.email}</div>
                                                     </div>
                                                 </div>
-                                                <div className="flex flex-col items-end gap-1">
-                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-500 border border-green-500/20">Active</span>
-                                                    <div className="text-[9px] text-gray-600">{user.registeredAt}</div>
-                                                </div>
-                                            </div>
 
-                                            <div className="grid grid-cols-2 gap-4 bg-black/20 p-3 rounded-xl border border-white/5">
-                                                <div>
-                                                    <div className="text-[9px] text-gray-500 uppercase font-bold tracking-wider mb-1">Balance</div>
-                                                    <div className="text-lg font-bold text-primary font-mono">${user.balance?.toLocaleString() || '0'}</div>
-                                                </div>
-                                                <div>
-                                                    <div className="text-[9px] text-gray-500 uppercase font-bold tracking-wider mb-1">Trade Result</div>
+                                                <div className="flex items-center justify-between gap-2 pt-2">
                                                     <div className="flex gap-1">
-                                                        {['win', 'loss'].map(type => (
-                                                            <button
-                                                                key={type}
-                                                                onClick={() => updateWinRate(user.email, type)}
-                                                                className={`flex-1 py-1 rounded text-[9px] font-bold uppercase ${winRates[user.email] === type || user.trade_result === type
-                                                                    ? (type === 'win' ? 'bg-green-500 text-black' : 'bg-red-500 text-white')
-                                                                    : 'bg-white/5 text-gray-500'}`}
-                                                            >
-                                                                {type}
-                                                            </button>
-                                                        ))}
+                                                        <button onClick={() => updatePoints(user.id, -100)} className="px-2 py-1.5 bg-red-500/10 text-red-500 rounded text-[10px] font-bold border border-red-500/10">-100</button>
+                                                        <button onClick={() => updatePoints(user.id, 100)} className="px-2 py-1.5 bg-green-500/10 text-green-500 rounded text-[10px] font-bold border border-green-500/10">+100</button>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => handleToggleFavorite(user.id)} className={`p-2 rounded-lg border ${user.isFavorite ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-white/5 text-gray-500 border-white/10'}`} title={user.isFavorite ? 'Unfavorite' : 'Favorite'}><Star size={15} className={user.isFavorite ? 'fill-yellow-400' : ''} /></button>
+                                                        <button onClick={() => handleToggleFreeze(user.id, user.isFrozen)} className={`p-2 rounded-lg border ${user.isFrozen ? 'bg-amber-500 text-black border-amber-500' : 'bg-white/5 text-gray-400 border-white/10'}`}><Ban size={16} /></button>
+                                                        <button onClick={() => resetUserPassword(user.id)} className="p-2 bg-blue-500/10 text-blue-500 rounded-lg border border-blue-500/20"><RefreshCw size={16} /></button>
+                                                        <button onClick={() => handleDeleteUser(user.id)} className="p-2 bg-red-500/10 text-red-400 rounded-lg border border-red-500/20"><Trash2 size={16} /></button>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <div className="flex items-center justify-between gap-2 pt-2">
-                                                <div className="flex gap-1">
-                                                    <button onClick={() => updatePoints(user.id, -100)} className="px-2 py-1.5 bg-red-500/10 text-red-500 rounded text-[10px] font-bold border border-red-500/10">-100</button>
-                                                    <button onClick={() => updatePoints(user.id, 100)} className="px-2 py-1.5 bg-green-500/10 text-green-500 rounded text-[10px] font-bold border border-green-500/10">+100</button>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button onClick={() => handleToggleFavorite(user.id)} className={`p-2 rounded-lg border ${user.isFavorite ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-white/5 text-gray-500 border-white/10'}`} title={user.isFavorite ? 'Unfavorite' : 'Favorite'}><Star size={15} className={user.isFavorite ? 'fill-yellow-400' : ''} /></button>
-                                                    <button onClick={() => handleToggleFreeze(user.id, user.isFrozen)} className={`p-2 rounded-lg border ${user.isFrozen ? 'bg-amber-500 text-black border-amber-500' : 'bg-white/5 text-gray-400 border-white/10'}`}><Ban size={16} /></button>
-                                                    <button onClick={() => resetUserPassword(user.id)} className="p-2 bg-blue-500/10 text-blue-500 rounded-lg border border-blue-500/20"><RefreshCw size={16} /></button>
-                                                    <button onClick={() => handleDeleteUser(user.id)} className="p-2 bg-red-500/10 text-red-400 rounded-lg border border-red-500/20"><Trash2 size={16} /></button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
                                     </div>
                                 </>
                             )}
@@ -2043,7 +2044,7 @@ const Admin = () => {
                                 <div className="p-4 border-b border-white/5 sticky top-0 bg-[#0a0f1c]/95 backdrop-blur-md z-10 flex flex-col gap-3">
                                     <div className="flex justify-between items-center">
                                         <h3 className="font-bold text-white text-sm uppercase tracking-wider">Conversations</h3>
-                                        <button 
+                                        <button
                                             onClick={() => setIsNewChatMode(!isNewChatMode)}
                                             className="p-1.5 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded transition-colors"
                                             title="New Chat"
@@ -2054,8 +2055,8 @@ const Admin = () => {
                                     {isNewChatMode && (
                                         <div className="relative">
                                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                                            <input 
-                                                type="text" 
+                                            <input
+                                                type="text"
                                                 placeholder="Search user..."
                                                 value={newChatSearch}
                                                 onChange={(e) => setNewChatSearch(e.target.value)}
@@ -2100,7 +2101,12 @@ const Admin = () => {
                                             return (
                                                 <div
                                                     key={conv.userEmail}
-                                                    onClick={() => setSelectedUserId(conv.userEmail)}
+                                                    onClick={() => {
+                                                        setSelectedUserId(conv.userEmail);
+                                                        if (conv.unread > 0) {
+                                                            markMessagesAsRead(conv.userEmail);
+                                                        }
+                                                    }}
                                                     className={`p-4 border-b border-white/5 cursor-pointer flex gap-3 transition-all duration-200 ${selectedUserId === conv.userEmail ? 'bg-primary/10 border-l-4 border-l-primary' : 'hover:bg-white/5 border-l-4 border-l-transparent'}`}
                                                 >
                                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex-shrink-0 flex items-center justify-center text-white font-bold text-xs relative">
@@ -2187,11 +2193,10 @@ const Admin = () => {
                                             )}
                                             <form
                                                 onSubmit={(e) => { e.preventDefault(); handleSendReply(); }}
-                                                className={`flex-shrink-0 flex gap-3 border rounded-xl p-2 transition-all duration-300 ${
-                                                    isRewriting 
-                                                        ? 'bg-primary/5 border-primary/40 shadow-[0_0_12px_rgba(212,175,55,0.15)]' 
-                                                        : 'bg-black/40 border-white/10 focus-within:border-primary/50 focus-within:bg-black/60'
-                                                }`}
+                                                className={`flex-shrink-0 flex gap-3 border rounded-xl p-2 transition-all duration-300 ${isRewriting
+                                                    ? 'bg-primary/5 border-primary/40 shadow-[0_0_12px_rgba(212,175,55,0.15)]'
+                                                    : 'bg-black/40 border-white/10 focus-within:border-primary/50 focus-within:bg-black/60'
+                                                    }`}
                                             >
                                                 <button type="button" className="p-2 text-gray-500 hover:text-white transition-colors">
                                                     <Plus size={20} />
@@ -2210,13 +2215,12 @@ const Admin = () => {
                                                     onClick={handleRewrite}
                                                     disabled={!replyMessage.trim() || isRewriting}
                                                     title="Rewrite as Professional"
-                                                    className={`p-2 rounded-lg transition-all hover:scale-105 disabled:opacity-30 disabled:hover:scale-100 ${
-                                                        replyMessage.trim() && !isRewriting
-                                                            ? 'text-primary hover:bg-primary/10 hover:shadow-[0_0_8px_rgba(212,175,55,0.3)]'
-                                                            : 'text-gray-600'
-                                                    }`}
+                                                    className={`p-2 rounded-lg transition-all hover:scale-105 disabled:opacity-30 disabled:hover:scale-100 ${replyMessage.trim() && !isRewriting
+                                                        ? 'text-primary hover:bg-primary/10 hover:shadow-[0_0_8px_rgba(212,175,55,0.3)]'
+                                                        : 'text-gray-600'
+                                                        }`}
                                                 >
-                                                    {isRewriting 
+                                                    {isRewriting
                                                         ? <RefreshCw size={18} className="animate-spin text-primary" />
                                                         : <Sparkles size={18} />
                                                     }
@@ -2245,7 +2249,7 @@ const Admin = () => {
                     )}
 
                     {activeSection === 'manageTransactions' && (
-                        <TransactionManagement 
+                        <TransactionManagement
                             depositRequests={depositRequests}
                             withdrawals={withdrawals}
                             updateDepositStatus={updateDepositStatus}
@@ -2388,7 +2392,7 @@ const Admin = () => {
                     {activeSection === 'settings' && (
                         <div className="bg-[#0a0f1c]/80 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl relative group p-8">
                             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-                            
+
                             <div className="flex justify-between items-center mb-10">
                                 <h3 className="text-2xl font-bold text-white flex items-center gap-3">
                                     <div className="w-12 h-12 rounded-2xl bg-gradient-gold flex items-center justify-center text-black shadow-glow">
@@ -2419,10 +2423,10 @@ const Admin = () => {
                                             <div>
                                                 <label className="block text-xs text-gray-400 mb-2 uppercase tracking-widest font-bold">Wallet Address</label>
                                                 <div className="relative">
-                                                    <input 
-                                                        type="text" 
-                                                        value={depositSettings[`${coin}Address`] || ''} 
-                                                        onChange={e => setDepositSettings({ ...depositSettings, [`${coin}Address`]: e.target.value })} 
+                                                    <input
+                                                        type="text"
+                                                        value={depositSettings[`${coin}Address`] || ''}
+                                                        onChange={e => setDepositSettings({ ...depositSettings, [`${coin}Address`]: e.target.value })}
                                                         className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:border-primary/50 outline-none transition-all pr-12 font-mono text-sm"
                                                         placeholder={`Enter ${coin.toUpperCase()} address`}
                                                     />
@@ -2435,10 +2439,10 @@ const Admin = () => {
                                             <div>
                                                 <label className="block text-xs text-gray-400 mb-2 uppercase tracking-widest font-bold">QR Code Image</label>
                                                 <div className="relative group/upload">
-                                                    <input 
-                                                        type="file" 
-                                                        accept="image/*" 
-                                                        onChange={e => handleFileUpload(e, coin)} 
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={e => handleFileUpload(e, coin)}
                                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                                     />
                                                     <div className="bg-white/5 border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center group-hover/upload:border-primary/30 group-hover/upload:bg-white/10 transition-all">
@@ -2451,7 +2455,7 @@ const Admin = () => {
                                             {depositSettings[`${coin}Qr`] && (
                                                 <div className="mt-4 relative group/qr">
                                                     <div className="absolute -top-2 -right-2 z-20">
-                                                        <button 
+                                                        <button
                                                             onClick={() => setDepositSettings({ ...depositSettings, [`${coin}Qr`]: '' })}
                                                             className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                                                         >
@@ -2504,7 +2508,7 @@ const Admin = () => {
                                                 {deposit.status}
                                             </span>
                                         </div>
-                                        
+
                                         <div className="space-y-4">
                                             <div>
                                                 <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1 font-sans">User Email</h4>
@@ -2525,13 +2529,13 @@ const Admin = () => {
                                                 <p className="text-xs font-mono text-gray-400 break-all bg-black/20 p-2 rounded-lg border border-white/5">{deposit.hash || 'N/A'}</p>
                                             </div>
                                             <div className="flex gap-3 pt-2">
-                                                <button 
+                                                <button
                                                     onClick={() => updateDepositStatus(deposit.id, 'approved')}
                                                     className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-600/20"
                                                 >
                                                     APPROVE
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => {
                                                         setRejectionModal({
                                                             isOpen: true,
@@ -2575,7 +2579,7 @@ const Admin = () => {
                                                 {w.status}
                                             </span>
                                         </div>
-                                        
+
                                         <div className="space-y-4">
                                             <div>
                                                 <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1 font-sans">User Email</h4>
@@ -2596,13 +2600,13 @@ const Admin = () => {
                                                 <p className="text-xs font-mono text-gray-400 break-all bg-black/20 p-2 rounded-lg border border-white/5">{w.walletAddress || 'N/A'}</p>
                                             </div>
                                             <div className="flex gap-3 pt-2">
-                                                <button 
+                                                <button
                                                     onClick={() => handleUpdateWithdrawalStatus(w.id, 'approved', w.amount, w.userEmail)}
                                                     className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-green-600/20"
                                                 >
                                                     APPROVE
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => {
                                                         setRejectionModal({
                                                             isOpen: true,
@@ -2664,7 +2668,7 @@ const Admin = () => {
                                             <tr><td colSpan="7" className="px-6 py-20 text-center text-gray-500">No open orders</td></tr>
                                         ) : allTrades.filter(t => t.status === 'pending' || t.status === 'active').map(trade => (
                                             <tr key={trade.id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
-                                                <td className="px-6 py-4 font-mono text-xs text-gray-400">{trade.user_id?.slice(0,8)}…</td>
+                                                <td className="px-6 py-4 font-mono text-xs text-gray-400">{trade.user_id?.slice(0, 8)}…</td>
                                                 <td className="px-6 py-4 font-bold text-white">{trade.symbol}</td>
                                                 <td className="px-6 py-4">
                                                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${trade.direction === 'up' || trade.direction === 'call' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>{trade.direction === 'up' || trade.direction === 'call' ? '▲ CALL' : '▼ PUT'}</span>
@@ -2705,7 +2709,7 @@ const Admin = () => {
                                             <tr><td colSpan="7" className="px-6 py-20 text-center text-gray-500">No completed orders</td></tr>
                                         ) : allTrades.filter(t => t.status === 'completed').map(trade => (
                                             <tr key={trade.id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
-                                                <td className="px-6 py-4 font-mono text-xs text-gray-400">{trade.user_id?.slice(0,8)}…</td>
+                                                <td className="px-6 py-4 font-mono text-xs text-gray-400">{trade.user_id?.slice(0, 8)}…</td>
                                                 <td className="px-6 py-4 font-bold text-white">{trade.symbol}</td>
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${trade.direction === 'up' || trade.direction === 'call' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>{trade.direction === 'up' || trade.direction === 'call' ? '▲ CALL' : '▼ PUT'}</span>
@@ -2748,7 +2752,7 @@ const Admin = () => {
                                             <tr><td colSpan="7" className="px-6 py-20 text-center text-gray-500">No trade records found</td></tr>
                                         ) : allTrades.map(trade => (
                                             <tr key={trade.id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
-                                                <td className="px-6 py-4 font-mono text-xs text-gray-400">{trade.user_id?.slice(0,8)}…</td>
+                                                <td className="px-6 py-4 font-mono text-xs text-gray-400">{trade.user_id?.slice(0, 8)}…</td>
                                                 <td className="px-6 py-4 font-bold text-white">{trade.symbol}</td>
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${trade.direction === 'up' || trade.direction === 'call' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>{trade.direction === 'up' || trade.direction === 'call' ? '▲ CALL' : '▼ PUT'}</span>
@@ -2866,7 +2870,7 @@ const Admin = () => {
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {conversations.filter(c => c.unread > 0).map(conv => (
-                                        <div key={conv.userEmail} className="bg-[#131b2f]/80 border border-amber-500/20 rounded-2xl p-5 flex items-center gap-4 hover:border-amber-500/40 transition-all cursor-pointer" onClick={() => { setActiveSection('chat'); setSelectedUserId(conv.userEmail); }}>
+                                        <div key={conv.userEmail} className="bg-[#131b2f]/80 border border-amber-500/20 rounded-2xl p-5 flex items-center gap-4 hover:border-amber-500/40 transition-all cursor-pointer" onClick={() => { setActiveSection('chat'); setSelectedUserId(conv.userEmail); markMessagesAsRead(conv.userEmail); }}>
                                             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-lg">{(conv.userName || conv.userEmail || '?')[0].toUpperCase()}</div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between mb-1">
@@ -2921,47 +2925,47 @@ const Admin = () => {
                     {activeSection === 'banned' && (() => {
                         const frozenUsers = users.filter(u => !isAdminAccount(u) && (u.isFrozen === true || u.status === 'banned'));
                         return (
-                        <div className="bg-[#0a0f1c]/80 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
-                            <div className="p-6 border-b border-white/5 flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500"><Ban size={20} /></div>
-                                <h3 className="text-xl font-bold text-white">Frozen / Banned Users</h3>
-                                <span className="ml-auto bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold px-3 py-1 rounded-full">{frozenUsers.length} Restricted</span>
+                            <div className="bg-[#0a0f1c]/80 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
+                                <div className="p-6 border-b border-white/5 flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500"><Ban size={20} /></div>
+                                    <h3 className="text-xl font-bold text-white">Frozen / Banned Users</h3>
+                                    <span className="ml-auto bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold px-3 py-1 rounded-full">{frozenUsers.length} Restricted</span>
+                                </div>
+                                {frozenUsers.length === 0 ? (
+                                    <div className="py-20 text-center text-gray-500">
+                                        <CheckCircle size={40} className="text-green-500 mx-auto mb-4" />
+                                        <p className="text-white font-bold mb-2">No Restricted Users</p>
+                                        <p className="text-sm">All users are in good standing.</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-white/5">
+                                        {frozenUsers.map(user => (
+                                            <div key={user.id} className="px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-bold border border-white/10 text-sm">
+                                                        {(user.full_name || user.email || '?').charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-white">{user.full_name || user.name || 'Unknown User'}</p>
+                                                        <p className="text-xs text-gray-500">{user.email}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                                        <Snowflake size={11} /> Frozen
+                                                    </span>
+                                                    <button
+                                                        onClick={() => handleToggleFreeze(user.id)}
+                                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-colors"
+                                                    >
+                                                        Unfreeze
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                            {frozenUsers.length === 0 ? (
-                                <div className="py-20 text-center text-gray-500">
-                                    <CheckCircle size={40} className="text-green-500 mx-auto mb-4" />
-                                    <p className="text-white font-bold mb-2">No Restricted Users</p>
-                                    <p className="text-sm">All users are in good standing.</p>
-                                </div>
-                            ) : (
-                                <div className="divide-y divide-white/5">
-                                    {frozenUsers.map(user => (
-                                        <div key={user.id} className="px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-bold border border-white/10 text-sm">
-                                                    {(user.full_name || user.email || '?').charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-white">{user.full_name || user.name || 'Unknown User'}</p>
-                                                    <p className="text-xs text-gray-500">{user.email}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                                    <Snowflake size={11} /> Frozen
-                                                </span>
-                                                <button
-                                                    onClick={() => handleToggleFreeze(user.id)}
-                                                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-colors"
-                                                >
-                                                    Unfreeze
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
                         );
                     })()}
 

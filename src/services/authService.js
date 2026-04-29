@@ -96,6 +96,32 @@ export const loginAdmin = async (email, password) => {
 export const logout = async () => {
     try {
         await signOut(auth);
+
+        // Remove all user-related records to ensure a clean slate
+        // Specifically wiping out anything that could be left over from previous exness clone
+        const keysToRemove = [
+            'user',
+            'adminEmail',
+            'adminToken',
+            'adminActiveSection',
+            'authToken',
+            'boundWithdrawalAddress'
+        ];
+
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+        // Scrub any lingering state related to exness just in case
+        Object.keys(localStorage).forEach(key => {
+            if (key.toLowerCase().includes('exness')) {
+                localStorage.removeItem(key);
+            }
+        });
+
+        sessionStorage.clear();
+        document.cookie.split(";").forEach(c => {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+
         return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
